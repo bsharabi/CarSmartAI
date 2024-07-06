@@ -59,8 +59,8 @@ class RobotMove(threading.Thread):
         """
         Resume the current movement.
         """
-        self.__flag.set()
         self.mc = True
+        self.__flag.set()
         self.log_state_change()
 
     def setup(self):
