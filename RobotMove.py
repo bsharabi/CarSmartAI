@@ -65,30 +65,38 @@ class RobotMove(threading.Thread):
         """
         Setup the GPIO pins and initialize PWM for the motors.
         """
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(self.Motor_A_EN, GPIO.OUT)
-        GPIO.setup(self.Motor_B_EN, GPIO.OUT)
-        GPIO.setup(self.Motor_A_Pin1, GPIO.OUT)
-        GPIO.setup(self.Motor_A_Pin2, GPIO.OUT)
-        GPIO.setup(self.Motor_B_Pin1, GPIO.OUT)
-        GPIO.setup(self.Motor_B_Pin2, GPIO.OUT)
+        try:
+            GPIO.setwarnings(False)
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(self.Motor_A_EN, GPIO.OUT)
+            GPIO.setup(self.Motor_B_EN, GPIO.OUT)
+            GPIO.setup(self.Motor_A_Pin1, GPIO.OUT)
+            GPIO.setup(self.Motor_A_Pin2, GPIO.OUT)
+            GPIO.setup(self.Motor_B_Pin1, GPIO.OUT)
+            GPIO.setup(self.Motor_B_Pin2, GPIO.OUT)
 
-        self.motor_stop()
+            self.motor_stop()
 
-        self.pwm_A = GPIO.PWM(self.Motor_A_EN, self.pwm_freq)
-        self.pwm_B = GPIO.PWM(self.Motor_B_EN, self.pwm_freq)
+            self.pwm_A = GPIO.PWM(self.Motor_A_EN, self.pwm_freq)
+            self.pwm_B = GPIO.PWM(self.Motor_B_EN, self.pwm_freq)
+        except Exception as e:
+            print(f"Error setting up GPIO: {e}")
+            self.terminate()
 
     def motor_stop(self):
         """
         Stop both motors.
         """
-        GPIO.output(self.Motor_A_Pin1, GPIO.LOW)
-        GPIO.output(self.Motor_A_Pin2, GPIO.LOW)
-        GPIO.output(self.Motor_B_Pin1, GPIO.LOW)
-        GPIO.output(self.Motor_B_Pin2, GPIO.LOW)
-        GPIO.output(self.Motor_A_EN, GPIO.LOW)
-        GPIO.output(self.Motor_B_EN, GPIO.LOW)
+        try:
+            GPIO.output(self.Motor_A_Pin1, GPIO.LOW)
+            GPIO.output(self.Motor_A_Pin2, GPIO.LOW)
+            GPIO.output(self.Motor_B_Pin1, GPIO.LOW)
+            GPIO.output(self.Motor_B_Pin2, GPIO.LOW)
+            GPIO.output(self.Motor_A_EN, GPIO.LOW)
+            GPIO.output(self.Motor_B_EN, GPIO.LOW)
+        except Exception as e:
+            print(f"Error stopping motors: {e}")
+            self.terminate()
 
     def __motor_A(self, direction, speed):
         """
@@ -97,15 +105,19 @@ class RobotMove(threading.Thread):
         :param direction: Direction of the motor (forward or backward).
         :param speed: Speed of the motor (0-100).
         """
-        if direction == self.Dir_backward:
-            GPIO.output(self.Motor_A_Pin1, GPIO.HIGH)
-            GPIO.output(self.Motor_A_Pin2, GPIO.LOW)
-        elif direction == self.Dir_forward:
-            GPIO.output(self.Motor_A_Pin1, GPIO.LOW)
-            GPIO.output(self.Motor_A_Pin2, GPIO.HIGH)
+        try:
+            if direction == self.Dir_backward:
+                GPIO.output(self.Motor_A_Pin1, GPIO.HIGH)
+                GPIO.output(self.Motor_A_Pin2, GPIO.LOW)
+            elif direction == self.Dir_forward:
+                GPIO.output(self.Motor_A_Pin1, GPIO.LOW)
+                GPIO.output(self.Motor_A_Pin2, GPIO.HIGH)
 
-        self.pwm_A.start(100)
-        self.pwm_A.ChangeDutyCycle(speed)
+            self.pwm_A.start(100)
+            self.pwm_A.ChangeDutyCycle(speed)
+        except Exception as e:
+            print(f"Error controlling motor A: {e}")
+            self.terminate()
 
     def __motor_B(self, direction, speed):
         """
@@ -114,15 +126,19 @@ class RobotMove(threading.Thread):
         :param direction: Direction of the motor (forward or backward).
         :param speed: Speed of the motor (0-100).
         """
-        if direction == self.Dir_forward:
-            GPIO.output(self.Motor_B_Pin1, GPIO.HIGH)
-            GPIO.output(self.Motor_B_Pin2, GPIO.LOW)
-        elif direction == self.Dir_backward:
-            GPIO.output(self.Motor_B_Pin1, GPIO.LOW)
-            GPIO.output(self.Motor_B_Pin2, GPIO.HIGH)
+        try:
+            if direction == self.Dir_forward:
+                GPIO.output(self.Motor_B_Pin1, GPIO.HIGH)
+                GPIO.output(self.Motor_B_Pin2, GPIO.LOW)
+            elif direction == self.Dir_backward:
+                GPIO.output(self.Motor_B_Pin1, GPIO.LOW)
+                GPIO.output(self.Motor_B_Pin2, GPIO.HIGH)
 
-        self.pwm_B.start(100)
-        self.pwm_B.ChangeDutyCycle(speed)
+            self.pwm_B.start(100)
+            self.pwm_B.ChangeDutyCycle(speed)
+        except Exception as e:
+            print(f"Error controlling motor B: {e}")
+            self.terminate()
     
     def log_state_change(self):
         """
@@ -216,17 +232,20 @@ class RobotMove(threading.Thread):
         """
         Check and log the status of the motors.
         """
-        motor_a_status = GPIO.input(self.Motor_A_EN)
-        motor_b_status = GPIO.input(self.Motor_B_EN)
+        try:
+            motor_a_status = GPIO.input(self.Motor_A_EN)
+            motor_b_status = GPIO.input(self.Motor_B_EN)
 
-        if motor_a_status == GPIO.LOW and motor_b_status == GPIO.LOW:
-            print("Both motors are stopped.")
-        elif motor_a_status == GPIO.HIGH and motor_b_status == GPIO.LOW:
-            print("Motor A is running, Motor B is stopped.")
-        elif motor_a_status == GPIO.LOW and motor_b_status == GPIO.HIGH:
-            print("Motor A is stopped, Motor B is running.")
-        else:
-            print("Both motors are running.")
+            if motor_a_status == GPIO.LOW and motor_b_status == GPIO.LOW:
+                print("Both motors are stopped.")
+            elif motor_a_status == GPIO.HIGH and motor_b_status == GPIO.LOW:
+                print("Motor A is running, Motor B is stopped.")
+            elif motor_a_status == GPIO.LOW and motor_b_status == GPIO.HIGH:
+                print("Motor A is stopped, Motor B is running.")
+            else:
+                print("Both motors are running.")
+        except Exception as e:
+            print(f"Error checking motor status: {e}")
 
 
 def main():
@@ -254,14 +273,6 @@ def main():
         robot.move(70, 'backward')
         time.sleep(5)
 
-        print(f"Stopping motors")
-        robot.move(0, 'none')
-        time.sleep(1)
-        
-        print(f"Moving forward at speed 50")
-        robot.move(50, 'forward')
-        time.sleep(5)
-        
         print(f"Stopping motors")
         robot.move(0, 'none')
         time.sleep(1)
