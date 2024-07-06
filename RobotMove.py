@@ -182,9 +182,10 @@ class RobotMove(threading.Thread):
         if self.mode == 'none':
             self.pause()
         elif self.mode == 'forward':
-            self.forward_processing()
+            self.forward_pprocessing()
         elif self.mode == 'backward':
             self.backward_processing()
+        print("done")
 
     def cleanup(self):
         """
