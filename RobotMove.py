@@ -44,6 +44,12 @@ class RobotMove(threading.Thread):
 
             self.initialized = True
 
+    def log_state_change(self):
+        """
+        Log and print the current state change of the robot.
+        """
+        print(f"Robot state changed: Speed={self.speed}, Mode={self.mode}")
+
     def pause(self):
         """
         Pause the current movement.
@@ -52,6 +58,7 @@ class RobotMove(threading.Thread):
         self.mc = False
         self.motor_stop()
         self.__flag.clear()
+        self.log_state_change()
 
     def resume(self):
         """
@@ -59,6 +66,7 @@ class RobotMove(threading.Thread):
         """
         self.__flag.set()
         self.mc = True
+        self.log_state_change()
 
     def setup(self):
         """
@@ -125,16 +133,20 @@ class RobotMove(threading.Thread):
 
     def move(self, speed, direction):
         """
-        Move the robot in the specified direction.
+        Move the robot in the specified direction with the given speed.
 
         :param speed: Speed of the motors (0-100).
+                      The speed controls the PWM duty cycle and hence the speed of the motors.
         :param direction: Direction to move ('forward', 'backward', 'none').
+                          'forward' - Moves the robot forward.
+                          'backward' - Moves the robot backward.
+                          'none' - Stops the robot.
         """
-        self.pause()
         self.speed = speed
         self.mode = direction
         self.mc = False
         self.resume()
+        self.log_state_change()
 
     def forward_processing(self):
         """
@@ -188,15 +200,15 @@ def main():
     robot.start()  # Start the thread
 
     try:
-        for i in range(10,100):
-            print("Moving forward speed "+i)
-            robot.move(i, 'forward')
-            time.sleep(1.3)
-        
-        for i in range(10,100):
-            print("Moving backward speed "+i)
-            robot.move(100, 'backward')
-            time.sleep(1)
+        print("Moving forward")
+        robot.move(100, 'forward')
+        time.sleep(1.3)
+        robot.pause()
+
+        print("Moving backward")
+        robot.move(100, 'backward')
+        time.sleep(1.3)
+        robot.pause()
 
         # Additional tests
         print("Stopping motors")
