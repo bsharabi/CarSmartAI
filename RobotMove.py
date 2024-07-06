@@ -136,16 +136,12 @@ def main():
         robot.move(100, 'forward')
         time.sleep(1.3)
         robot.motor_stop()
-
-        print("Turning left")
-        robot.move(80, 'forward', 'left', 0.8)
+        
+        print("Moving Backward")
+        robot.move(100, 'backward')
         time.sleep(1.3)
         robot.motor_stop()
-
-        print("Turning right")
-        robot.move(80, 'forward', 'right', 0.8)
-        time.sleep(1.3)
-        robot.motor_stop()
+       
 
     except KeyboardInterrupt:
         print("Measurement stopped by user")
