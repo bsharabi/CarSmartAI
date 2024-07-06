@@ -194,7 +194,7 @@ class RobotMove(threading.Thread):
 def main():
     robot = RobotMove()
     robot.start()  # Start the thread
-
+    time.sleep(3)
     try:
         for i in range(0,100,10):
             print("Moving forward speed "+i)
@@ -216,7 +216,6 @@ def main():
     except KeyboardInterrupt:
         print("Measurement stopped by user")
     finally:
-        print("hello")
         robot.cleanup()
         robot.join()  # Ensure the thread is properly terminated
 
