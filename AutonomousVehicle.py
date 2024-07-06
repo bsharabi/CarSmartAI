@@ -2,7 +2,7 @@ import time
 from RobotMove import RobotMove
 from RobotLight import RobotLight
 from UltrasonicSensor import UltrasonicSensor
-from RobotServo import ServoCtrl
+from ServoCtrl import ServoCtrl
 
 class AutonomousVehicle:
     def __init__(self):
@@ -12,7 +12,7 @@ class AutonomousVehicle:
         self.servo_ctrl = ServoCtrl()
 
         self.distance_threshold = 30  # cm, distance threshold to consider an obstacle
-        self.speed = 70  # initial speed
+        self.speed = 50  # initial speed
         self.scan_delay = 0.5  # delay between scans
 
     def start(self):
@@ -64,19 +64,24 @@ class AutonomousVehicle:
 
                 if left_distance and right_distance:
                     if left_distance > right_distance:
-                        self.robot_move.move(self.speed, 'forward')
                         self.servo_ctrl.turnLeft()
-                    else:
                         self.robot_move.move(self.speed, 'forward')
+                    else:
                         self.servo_ctrl.turnRight()
+                        self.robot_move.move(self.speed, 'forward')
                 elif left_distance:
-                    self.robot_move.move(self.speed, 'forward')
                     self.servo_ctrl.turnLeft()
-                elif right_distance:
                     self.robot_move.move(self.speed, 'forward')
+                elif right_distance:
                     self.servo_ctrl.turnRight()
+                    self.robot_move.move(self.speed, 'forward')
                 else:
-                    self.robot_move.move(0, 'none')  # No clear path, stop
+                    print("No clear path forward, moving backward.")
+                    self.robot_move.move(self.speed, 'backward')
+                    time.sleep(1)
+                    self.robot_move.pause()
+                    # Reduce speed to avoid collision when moving backward
+                    self.robot_move.move(self.speed // 2, 'backward')
 
             else:
                 print("Path clear, moving forward.")
