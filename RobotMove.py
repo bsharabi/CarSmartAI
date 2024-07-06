@@ -41,6 +41,7 @@ class RobotMove(threading.Thread):
             self.__terminate = threading.Event()
             self.mode = 'none'
             self.speed = 0
+            self.speed_changed = False
 
             self.initialized = True
 
@@ -57,8 +58,8 @@ class RobotMove(threading.Thread):
         """
         Resume the current movement.
         """
-        self.log_state_change()
         self.__flag.set()
+        self.log_state_change()
 
     def setup(self):
         """
@@ -103,8 +104,6 @@ class RobotMove(threading.Thread):
             GPIO.output(self.Motor_A_Pin1, GPIO.LOW)
             GPIO.output(self.Motor_A_Pin2, GPIO.HIGH)
 
-        GPIO.output(self.Motor_A_EN, GPIO.HIGH)
-        GPIO.output(self.Motor_B_EN, GPIO.HIGH)
         self.pwm_A.start(100)
         self.pwm_A.ChangeDutyCycle(speed)
 
@@ -122,9 +121,6 @@ class RobotMove(threading.Thread):
             GPIO.output(self.Motor_B_Pin1, GPIO.LOW)
             GPIO.output(self.Motor_B_Pin2, GPIO.HIGH)
 
-
-        GPIO.output(self.Motor_A_EN, GPIO.HIGH)
-        GPIO.output(self.Motor_B_EN, GPIO.HIGH)
         self.pwm_B.start(100)
         self.pwm_B.ChangeDutyCycle(speed)
     
@@ -147,6 +143,7 @@ class RobotMove(threading.Thread):
         """
         self.speed = speed
         self.mode = direction
+        self.speed_changed = True
         self.log_state_change()
         self.resume()
 
@@ -157,12 +154,13 @@ class RobotMove(threading.Thread):
         self.__motor_A(self.Dir_forward, self.speed)
         self.__motor_B(self.Dir_forward, self.speed)
 
-        while self.mode=='forward':
-            if self.__terminate.is_set():
-                break
+        while self.mode == 'forward' and not self.__terminate.is_set():
+            if self.speed_changed:
+                self.__motor_A(self.Dir_forward, self.speed)
+                self.__motor_B(self.Dir_forward, self.speed)
+                self.speed_changed = False
             time.sleep(0.01)
-        print("out")
-        print(self.mode)
+        self.motor_stop()
 
     def backward_processing(self):
         """
@@ -170,10 +168,14 @@ class RobotMove(threading.Thread):
         """
         self.__motor_A(self.Dir_backward, self.speed)
         self.__motor_B(self.Dir_backward, self.speed)
-        while self.mode=='backward':
-            if self.__terminate.is_set():
-                break
+
+        while self.mode == 'backward' and not self.__terminate.is_set():
+            if self.speed_changed:
+                self.__motor_A(self.Dir_backward, self.speed)
+                self.__motor_B(self.Dir_backward, self.speed)
+                self.speed_changed = False
             time.sleep(0.01)
+        self.motor_stop()
 
     def mode_change(self):
         """
@@ -182,10 +184,9 @@ class RobotMove(threading.Thread):
         if self.mode == 'none':
             self.pause()
         elif self.mode == 'forward':
-            self.forward_pprocessing()
+            self.forward_processing()
         elif self.mode == 'backward':
             self.backward_processing()
-        print("done")
 
     def cleanup(self):
         """
@@ -209,7 +210,6 @@ class RobotMove(threading.Thread):
         print("Thread started")
         while not self.__terminate.is_set():
             self.__flag.wait()
-            print("mode change")
             self.mode_change()
 
     def check_motor_status(self):
@@ -234,25 +234,29 @@ def main():
     robot.start()  # Start the thread
 
     try:
-        for i in range(10, 100, 10):
-            print(f"Moving forward at speed {i}")
-            robot.move(i, 'forward')
-            time.sleep(5)
-            robot.pause()
-            robot.check_motor_status()
+        print(f"Moving forward at speed 50")
+        robot.move(50, 'forward')
+        time.sleep(5)
         
-        for i in range(10, 100, 10):
-            print(f"Moving backward at speed {i}")
-            robot.move(i, 'backward')
-            time.sleep(5)
-            robot.pause()
-            robot.check_motor_status()
+        print(f"Increasing speed to 80")
+        robot.move(80, 'forward')
+        time.sleep(5)
 
-        # Additional tests
-        print("Stopping motors")
+        print(f"Decreasing speed to 30")
+        robot.move(30, 'forward')
+        time.sleep(5)
+
+        print(f"Moving backward at speed 40")
+        robot.move(40, 'backward')
+        time.sleep(5)
+
+        print(f"Increasing speed to 70")
+        robot.move(70, 'backward')
+        time.sleep(5)
+
+        print(f"Stopping motors")
         robot.move(0, 'none')
         time.sleep(1)
-        robot.check_motor_status()
 
         print("Test complete")
 
