@@ -1,20 +1,32 @@
 import psutil
 import os
 import settings
+import threading
 
 class RobotInfo:
+    """
+    A singleton class to retrieve and display system information for the robot.
+    """
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super(RobotInfo, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self):
-        """
-        Initialize the RobotInfo class.
-        """
-        self.cpu_temp_path = settings.CPU_TEMP_PATH
-        self.gpu_temp_command = settings.GPU_TEMP_COMMAND
+        if not hasattr(self, 'initialized'):  # To prevent reinitialization
+            self.cpu_temp_path = settings.CPU_TEMP_PATH
+            self.gpu_temp_command = settings.GPU_TEMP_COMMAND
+            self.initialized = True
 
     def get_cpu_temp(self):
         """
         Get the CPU temperature.
 
-        :return: CPU temperature in degrees Celsius as a string.
+        :return: CPU temperature in degrees Celsius as a string, or 'N/A' if not available.
         """
         try:
             with open(self.cpu_temp_path, 'r') as file:
@@ -22,17 +34,21 @@ class RobotInfo:
                 return f"{temp:.1f}"
         except FileNotFoundError:
             return "N/A"
+        except Exception as e:
+            print(f"Error reading CPU temperature: {e}")
+            return "N/A"
 
     def get_gpu_temp(self):
         """
         Get the GPU temperature.
 
-        :return: GPU temperature in degrees Celsius as a string.
+        :return: GPU temperature in degrees Celsius as a string, or 'N/A' if not available.
         """
         try:
             temp = os.popen(self.gpu_temp_command).readline().replace("temp=", "").strip()
             return temp
-        except Exception:
+        except Exception as e:
+            print(f"Error reading GPU temperature: {e}")
             return "N/A"
 
     def get_cpu_usage(self):
