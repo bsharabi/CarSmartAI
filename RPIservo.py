@@ -409,53 +409,53 @@ def main():
     sc.start()
 
     try:
-        # Test turn_left function
-        print("Turning left")
-        sc.turn_left()
-        time.sleep(1)
+        # # Test turn_left function
+        # print("Turning left")
+        # sc.turn_left()
+        # time.sleep(1)
 
         # Test turn_right function
         print("Turning right")
         sc.turn_right()
         time.sleep(1)
 
-        # Test turn_middle function
-        print("Turning to middle")
-        sc.turn_middle()
-        time.sleep(1)
+        # # Test turn_middle function
+        # print("Turning to middle")
+        # sc.turn_middle()
+        # time.sleep(1)
 
-        # Test radar_scan function (assuming UltrasonicSensor class is defined)
-        from UltrasonicSensor import UltrasonicSensor
-        sensor = UltrasonicSensor(settings.ULTRASONIC_TR_PIN, settings.ULTRASONIC_EC_PIN)
-        print("Radar scanning")
-        scan_results = sc.radar_scan(sensor)
-        print("Scan results:", scan_results)
+        # # Test radar_scan function (assuming UltrasonicSensor class is defined)
+        # from UltrasonicSensor import UltrasonicSensor
+        # sensor = UltrasonicSensor(settings.ULTRASONIC_TR_PIN, settings.ULTRASONIC_EC_PIN)
+        # print("Radar scanning")
+        # scan_results = sc.radar_scan(sensor)
+        # print("Scan results:", scan_results)
         
-        # Test get_direction function
-        print("Getting direction of servo 1")
-        direction = sc.get_direction(1)
-        print("Direction:", direction)
+        # # Test get_direction function
+        # print("Getting direction of servo 1")
+        # direction = sc.get_direction(1)
+        # print("Direction:", direction)
 
-        # Test move_angle function
-        print("Moving servo 1 to 45 degrees")
-        sc.move_angle(1, 45)
-        time.sleep(1)
+        # # Test move_angle function
+        # print("Moving servo 1 to 45 degrees")
+        # sc.move_angle(1, 45)
+        # time.sleep(1)
 
-        # Test single_servo function
-        print("Wiggling servo 1")
-        sc.single_servo(1, 1, 10)
-        time.sleep(2)
-        sc.stop_wiggle()
+        # # Test single_servo function
+        # print("Wiggling servo 1")
+        # sc.single_servo(1, 1, 10)
+        # time.sleep(2)
+        # sc.stop_wiggle()
 
-        # Test auto_speed function
-        print("Moving servo 1 to 30 degrees with auto speed")
-        sc.auto_speed([1], [30])
-        time.sleep(2)
+        # # Test auto_speed function
+        # print("Moving servo 1 to 30 degrees with auto speed")
+        # sc.auto_speed([1], [30])
+        # time.sleep(2)
 
-        # Test cert_speed function
-        print("Moving servo 1 to 60 degrees with certain speed")
-        sc.cert_speed([1], [60], [5])
-        time.sleep(2)
+        # # Test cert_speed function
+        # print("Moving servo 1 to 60 degrees with certain speed")
+        # sc.cert_speed([1], [60], [5])
+        # time.sleep(2)
 
     except KeyboardInterrupt:
         print("Program interrupted by user")
