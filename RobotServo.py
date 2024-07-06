@@ -565,7 +565,7 @@ def main():
         sc.certSpeed([0, 1], [30, -30], [5, 5])
         time.sleep(2)
         sc.singleServo(0, 1, 5)
-        time.sleep(6)
+        time.sleep(2)
         sc.singleServo(0, -1, 30)
         time.sleep(1)
         print(sc.radar_scan())
@@ -574,6 +574,7 @@ def main():
         sc.turnRight()
         time.sleep(2)
         sc.turnMiddle()
+        time.sleep(2)
     except KeyboardInterrupt:
         print("Measurement stopped by user")
     finally:
