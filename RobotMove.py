@@ -38,6 +38,7 @@ class RobotMove(threading.Thread):
             # Thread control variables
             self.__flag = threading.Event()
             self.__flag.clear()
+            self.__terminate = threading.Event()
             self.mode = 'none'
             self.speed = 0
             self.mc = False
@@ -52,6 +53,7 @@ class RobotMove(threading.Thread):
         self.mc = False
         self.motor_stop()
         self.__flag.clear()
+        self.log_state_change()
 
     def resume(self):
         """
@@ -132,16 +134,20 @@ class RobotMove(threading.Thread):
 
     def move(self, speed, direction):
         """
-        Move the robot in the specified direction.
+        Move the robot in the specified direction with the given speed.
 
         :param speed: Speed of the motors (0-100).
+                      The speed controls the PWM duty cycle and hence the speed of the motors.
         :param direction: Direction to move ('forward', 'backward', 'none').
+                          'forward' - Moves the robot forward.
+                          'backward' - Moves the robot backward.
+                          'none' - Stops the robot.
         """
-        
         self.speed = speed
         self.mode = direction
         self.mc = False
         self.resume()
+        self.log_state_change()
 
     def forward_processing(self):
         """
@@ -150,6 +156,8 @@ class RobotMove(threading.Thread):
         self.__motor_A(self.Dir_forward, self.speed)
         self.__motor_B(self.Dir_forward, self.speed)
         while self.mc:
+            if self.__terminate.is_set():
+                break
             time.sleep(0.01)
         self.motor_stop()
 
@@ -160,6 +168,8 @@ class RobotMove(threading.Thread):
         self.__motor_A(self.Dir_backward, self.speed)
         self.__motor_B(self.Dir_backward, self.speed)
         while self.mc:
+            if self.__terminate.is_set():
+                break
             time.sleep(0.01)
         self.motor_stop()
 
@@ -181,12 +191,20 @@ class RobotMove(threading.Thread):
         self.motor_stop()
         GPIO.cleanup()
 
+    def terminate(self):
+        """
+        Terminate the thread safely.
+        """
+        self.__terminate.set()
+        self.__flag.set()  # Ensure the thread exits any wait state
+        self.cleanup()
+
     def run(self):
         """
         Run the thread to handle the movement process.
         """
-        print("start")
-        while True:
+        print("Thread started")
+        while not self.__terminate.is_set():
             self.__flag.wait()
             self.mode_change()
 
@@ -194,15 +212,15 @@ class RobotMove(threading.Thread):
 def main():
     robot = RobotMove()
     robot.start()  # Start the thread
-    time.sleep(3)
+
     try:
-        for i in range(0,100,10):
-            print("Moving forward speed "+i)
+        for i in range(0, 100, 10):
+            print(f"Moving forward at speed {i}")
             robot.move(i, 'forward')
             time.sleep(1)
         
-        for i in range(0,100,10):
-            print("Moving backward speed "+i)
+        for i in range(0, 100, 10):
+            print(f"Moving backward at speed {i}")
             robot.move(i, 'backward')
             time.sleep(1)
 
@@ -216,7 +234,7 @@ def main():
     except KeyboardInterrupt:
         print("Measurement stopped by user")
     finally:
-        robot.cleanup()
+        robot.terminate()
         robot.join()  # Ensure the thread is properly terminated
 
 
