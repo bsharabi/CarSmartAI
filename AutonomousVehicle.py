@@ -12,7 +12,7 @@ class AutonomousVehicle:
         self.servo_ctrl = ServoCtrl()
 
         self.distance_threshold = 30  # cm, distance threshold to consider an obstacle
-        self.speed = 50  # initial speed
+        self.speed = 70  # initial speed
         self.scan_delay = 0.5  # delay between scans
 
     def start(self):
