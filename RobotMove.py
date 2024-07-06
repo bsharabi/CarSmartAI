@@ -238,7 +238,7 @@ def main():
         for i in range(0, 100, 10):
             print(f"Moving forward at speed {i}")
             robot.move(i, 'forward')
-            time.sleep(1)
+            time.sleep(10)
             robot.check_motor_status()
         
         for i in range(0, 100, 10):
