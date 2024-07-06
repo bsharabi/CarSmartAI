@@ -436,10 +436,10 @@ def main():
         # direction = sc.get_direction(1)
         # print("Direction:", direction)
 
-        # # Test move_angle function
-        # print("Moving servo 1 to 45 degrees")
-        # sc.move_angle(1, 45)
-        # time.sleep(1)
+        # Test move_angle function
+        print("Moving servo 1 to 45 degrees")
+        sc.move_angle(1, 45)
+        time.sleep(1)
 
         # # Test single_servo function
         # print("Wiggling servo 1")
