@@ -137,7 +137,7 @@ class RobotMove(threading.Thread):
         :param speed: Speed of the motors (0-100).
         :param direction: Direction to move ('forward', 'backward', 'none').
         """
-        self.pause()
+        
         self.speed = speed
         self.mode = direction
         self.mc = False
@@ -185,6 +185,7 @@ class RobotMove(threading.Thread):
         """
         Run the thread to handle the movement process.
         """
+        print("start")
         while True:
             self.__flag.wait()
             self.mode_change()
