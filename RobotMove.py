@@ -41,7 +41,6 @@ class RobotMove(threading.Thread):
             self.__terminate = threading.Event()
             self.mode = 'none'
             self.speed = 0
-            self.mc = False
 
             self.initialized = True
 
@@ -50,18 +49,16 @@ class RobotMove(threading.Thread):
         Pause the current movement.
         """
         self.mode = 'none'
-        self.mc = False
         self.motor_stop()
-        self.__flag.clear()
         self.log_state_change()
+        self.__flag.clear()
 
     def resume(self):
         """
         Resume the current movement.
         """
-        self.mc = True
-        self.__flag.set()
         self.log_state_change()
+        self.__flag.set()
 
     def setup(self):
         """
@@ -143,12 +140,10 @@ class RobotMove(threading.Thread):
                           'backward' - Moves the robot backward.
                           'none' - Stops the robot.
         """
-        self.pause()
         self.speed = speed
         self.mode = direction
-        self.mc = False
-        self.resume()
         self.log_state_change()
+        self.resume()
 
     def forward_processing(self):
         """
@@ -156,14 +151,13 @@ class RobotMove(threading.Thread):
         """
         self.__motor_A(self.Dir_forward, self.speed)
         self.__motor_B(self.Dir_forward, self.speed)
-        print(self.mc)
-        while self.mc:
+
+        while self.mode=='forward':
             if self.__terminate.is_set():
                 break
             time.sleep(0.01)
         print("out")
-        print(self.mc)
-        self.motor_stop()
+        print(self.mode)
 
     def backward_processing(self):
         """
@@ -171,11 +165,10 @@ class RobotMove(threading.Thread):
         """
         self.__motor_A(self.Dir_backward, self.speed)
         self.__motor_B(self.Dir_backward, self.speed)
-        while self.mc:
+        while self.mode=='backward':
             if self.__terminate.is_set():
                 break
             time.sleep(0.01)
-        self.motor_stop()
 
     def mode_change(self):
         """
@@ -235,16 +228,18 @@ def main():
     robot.start()  # Start the thread
 
     try:
-        for i in range(0, 100, 10):
+        for i in range(10, 100, 10):
             print(f"Moving forward at speed {i}")
             robot.move(i, 'forward')
-            time.sleep(10)
+            time.sleep(5)
+            robot.pause()
             robot.check_motor_status()
         
-        for i in range(0, 100, 10):
+        for i in range(10, 100, 10):
             print(f"Moving backward at speed {i}")
             robot.move(i, 'backward')
-            time.sleep(1)
+            time.sleep(5)
+            robot.pause()
             robot.check_motor_status()
 
         # Additional tests
