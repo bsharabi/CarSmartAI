@@ -208,6 +208,22 @@ class RobotMove(threading.Thread):
             self.__flag.wait()
             self.mode_change()
 
+    def check_motor_status(self):
+        """
+        Check and log the status of the motors.
+        """
+        motor_a_status = GPIO.input(self.Motor_A_EN)
+        motor_b_status = GPIO.input(self.Motor_B_EN)
+
+        if motor_a_status == GPIO.LOW and motor_b_status == GPIO.LOW:
+            print("Both motors are stopped.")
+        elif motor_a_status == GPIO.HIGH and motor_b_status == GPIO.LOW:
+            print("Motor A is running, Motor B is stopped.")
+        elif motor_a_status == GPIO.LOW and motor_b_status == GPIO.HIGH:
+            print("Motor A is stopped, Motor B is running.")
+        else:
+            print("Both motors are running.")
+
 
 def main():
     robot = RobotMove()
@@ -217,17 +233,20 @@ def main():
         for i in range(0, 100, 10):
             print(f"Moving forward at speed {i}")
             robot.move(i, 'forward')
-            time.sleep(10)
+            time.sleep(1)
+            robot.check_motor_status()
         
         for i in range(0, 100, 10):
             print(f"Moving backward at speed {i}")
             robot.move(i, 'backward')
             time.sleep(1)
+            robot.check_motor_status()
 
         # Additional tests
         print("Stopping motors")
         robot.move(0, 'none')
         time.sleep(1)
+        robot.check_motor_status()
 
         print("Test complete")
 
