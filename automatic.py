@@ -11,7 +11,7 @@ thisPath = '/'+os.path.dirname(curpath)
 
 def num_import_int(initial):        
     global r
-    with open(thisPath+"/RPIservo.py") as f:
+    with open( os.path.join( thisPath,"RPIservo.py")) as f:
         for line in f.readlines():
             if(line.find(initial) == 0):
                 r=line
