@@ -12,14 +12,14 @@ Motor_A_Pin2  = 15
 Motor_B_Pin1  = 27
 Motor_B_Pin2  = 18
 
-Dir_forward   = 0
-Dir_backward  = 1
+Dir_forward   = 1
+Dir_backward  = 0
 
-left_forward  = 0
-left_backward = 1
+left_forward  = 1
+left_backward = 0
 
-right_forward = 0
-right_backward= 1
+right_forward = 1
+right_backward= 0
 
 pwn_A = 0
 pwm_B = 0
@@ -131,14 +131,14 @@ def destroy():
 	GPIO.cleanup()         
 
 
-if __name__ == '__main__':
-	try:
-		speed_set = 60
-		setup()
-		move(speed_set, 'forward', 'no', 0.8)
-		time.sleep(1.3)
-		motorStop()
-		destroy()
-	except KeyboardInterrupt:
-		destroy()
+# if __name__ == '__main__':
+# 	try:
+# 		speed_set = 60
+# 		setup()
+# 		move(speed_set, 'forward', 'no', 0.8)
+# 		time.sleep(1.3)
+# 		motorStop()
+# 		destroy()
+# 	except KeyboardInterrupt:
+# 		destroy()
 
