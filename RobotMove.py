@@ -1,30 +1,64 @@
 import time
-import RPi.GPIO as GPIO # type: ignore
+import RPi.GPIO as GPIO  # type: ignore
 import settings
+import threading
 
-class RobotMove:
-    
+
+class RobotMove(threading.Thread):
+    """
+    A singleton class to control the movement of a robot using GPIO pins.
+    This class extends threading.Thread to allow asynchronous control.
+    """
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(RobotMove, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self):
+        if not hasattr(self, 'initialized'):  # To prevent reinitialization
+            super().__init__()
+            self.Motor_A_EN = settings.MOTOR_A_EN
+            self.Motor_B_EN = settings.MOTOR_B_EN
+            self.Motor_A_Pin1 = settings.MOTOR_A_PIN1
+            self.Motor_A_Pin2 = settings.MOTOR_A_PIN2
+            self.Motor_B_Pin1 = settings.MOTOR_B_PIN1
+            self.Motor_B_Pin2 = settings.MOTOR_B_PIN2
+
+            self.Dir_forward = 0
+            self.Dir_backward = 1
+
+            self.pwm_freq = settings.PWM_FREQUENCY_ENGINE
+            self.pwm_A = None
+            self.pwm_B = None
+
+            self.setup()
+
+            # Thread control variables
+            self.__flag = threading.Event()
+            self.__flag.clear()
+            self.mode = 'none'
+            self.speed = 0
+            self.mc = False
+
+            self.initialized = True
+
+    def pause(self):
         """
-        Initialize the RobotMove class with motor pins and PWM frequency.
-
-        :param pwm_freq: PWM frequency for motor speed control.
+        Pause the current movement.
         """
-        self.Motor_A_EN = settings.MOTOR_A_EN
-        self.Motor_B_EN = settings.MOTOR_B_EN
-        self.Motor_A_Pin1 = settings.MOTOR_A_PIN1
-        self.Motor_A_Pin2 = settings.MOTOR_A_PIN2
-        self.Motor_B_Pin1 = settings.MOTOR_B_PIN1
-        self.Motor_B_Pin2 = settings.MOTOR_B_PIN2
+        self.mode = 'none'
+        self.mc = False
+        self.motor_stop()
+        self.__flag.clear()
 
-        self.Dir_forward = 0
-        self.Dir_backward = 1
-
-        self.pwm_freq = settings.PWM_FREQUENCY_ENGINE
-        self.pwm_A = None
-        self.pwm_B = None
-
-        self.setup()
+    def resume(self):
+        """
+        Resume the current movement.
+        """
+        self.__flag.set()
+        self.mc = True
 
     def setup(self):
         """
@@ -55,7 +89,7 @@ class RobotMove:
         GPIO.output(self.Motor_A_EN, GPIO.LOW)
         GPIO.output(self.Motor_B_EN, GPIO.LOW)
 
-    def motor_A(self, direction, speed):
+    def __motor_A(self, direction, speed):
         """
         Control motor A.
 
@@ -72,7 +106,7 @@ class RobotMove:
         self.pwm_A.start(100)
         self.pwm_A.ChangeDutyCycle(speed)
 
-    def motor_B(self, direction, speed):
+    def __motor_B(self, direction, speed):
         """
         Control motor B.
 
@@ -91,21 +125,47 @@ class RobotMove:
 
     def move(self, speed, direction):
         """
-        Move the robot in the specified direction with optional turning.
+        Move the robot in the specified direction.
 
         :param speed: Speed of the motors (0-100).
-        :param direction: Direction to move ('forward', 'backward', 'no').
-        :param turn: Optional turning direction ('left', 'right').
-        :param radius: Turning radius (0 < radius <= 1).
+        :param direction: Direction to move ('forward', 'backward', 'none').
         """
-        if direction == 'forward':
-                self.motor_A(self.Dir_forward, speed)
-                self.motor_B(self.Dir_forward, speed)
-        elif direction == 'backward':
-                self.motor_A(self.Dir_backward, speed)
-                self.motor_B(self.Dir_backward, speed)
-        elif direction == 'no':
-            self.motor_stop()
+        self.pause()
+        self.speed = speed
+        self.mode = direction
+        self.mc = False
+        self.resume()
+
+    def forward_processing(self):
+        """
+        Processing logic for forward movement.
+        """
+        self.__motor_A(self.Dir_forward, self.speed)
+        self.__motor_B(self.Dir_forward, self.speed)
+        while self.mc:
+            time.sleep(0.01)
+        self.motor_stop()
+
+    def backward_processing(self):
+        """
+        Processing logic for backward movement.
+        """
+        self.__motor_A(self.Dir_backward, self.speed)
+        self.__motor_B(self.Dir_backward, self.speed)
+        while self.mc:
+            time.sleep(0.01)
+        self.motor_stop()
+
+    def mode_change(self):
+        """
+        Change the movement mode based on the current mode setting.
+        """
+        if self.mode == 'none':
+            self.pause()
+        elif self.mode == 'forward':
+            self.forward_processing()
+        elif self.mode == 'backward':
+            self.backward_processing()
 
     def cleanup(self):
         """
@@ -114,28 +174,43 @@ class RobotMove:
         self.motor_stop()
         GPIO.cleanup()
 
+    def run(self):
+        """
+        Run the thread to handle the movement process.
+        """
+        while True:
+            self.__flag.wait()
+            self.mode_change()
+
 
 def main():
     robot = RobotMove()
+    robot.start()  # Start the thread
 
     try:
-        print("Moving forward")
-        robot.move(100, 'forward')
-        time.sleep(1.3)
-        robot.motor_stop()
+        for i in range(10,100):
+            print("Moving forward speed "+i)
+            robot.move(i, 'forward')
+            time.sleep(1.3)
         
-        print("Moving Backward")
-        robot.move(100, 'backward')
-        time.sleep(1.3)
-        robot.motor_stop()
-       
+        for i in range(10,100):
+            print("Moving backward speed "+i)
+            robot.move(100, 'backward')
+            time.sleep(1)
+
+        # Additional tests
+        print("Stopping motors")
+        robot.move(0, 'none')
+        time.sleep(1)
+
+        print("Test complete")
 
     except KeyboardInterrupt:
         print("Measurement stopped by user")
     finally:
         robot.cleanup()
+        robot.join()  # Ensure the thread is properly terminated
 
 
 if __name__ == '__main__':
     main()
-
