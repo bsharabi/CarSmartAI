@@ -217,7 +217,7 @@ def main():
         for i in range(0, 100, 10):
             print(f"Moving forward at speed {i}")
             robot.move(i, 'forward')
-            time.sleep(1)
+            time.sleep(10)
         
         for i in range(0, 100, 10):
             print(f"Moving backward at speed {i}")
