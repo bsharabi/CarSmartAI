@@ -155,10 +155,13 @@ class RobotMove(threading.Thread):
         """
         self.__motor_A(self.Dir_forward, self.speed)
         self.__motor_B(self.Dir_forward, self.speed)
+        print(self.mc)
         while self.mc:
             if self.__terminate.is_set():
                 break
             time.sleep(0.01)
+        print("out")
+        print(self.mc)
         self.motor_stop()
 
     def backward_processing(self):
