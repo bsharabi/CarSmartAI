@@ -169,7 +169,7 @@ class ServoCtrl(threading.Thread):
             self.bufferPos[i] = self.lastPos[i]
 
         while self.nowPos != self.goalPos:
-            for i in range(16):
+            for i in range(3):
                 if self.lastPos[i] < self.goalPos[i]:
                     self.bufferPos[i] += self.pwmGenOut(self.scSpeed[i]) / (1 / self.scDelay)
                     newNow = int(round(self.bufferPos[i], 0))
@@ -373,8 +373,8 @@ class ServoCtrl(threading.Thread):
 
         :param coe: Coefficient for turning
         """
-        pwm2_pos = self.initPos[SERVO_WHEEL] + int(coe * 100 * self.sc_direction[2])
-        pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[2], self.minPos[2])
+        pwm2_pos = self.initPos[SERVO_WHEEL] + int(coe * 100 * self.sc_direction[SERVO_WHEEL])
+        pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[SERVO_WHEEL], self.minPos[SERVO_WHEEL])
         self.robot_light.both_off()
         self.robot_light.yellow()
         self.pwm.set_pwm(SERVO_WHEEL, 0, pwm2_pos)
@@ -385,8 +385,8 @@ class ServoCtrl(threading.Thread):
 
         :param coe: Coefficient for turning
         """
-        pwm2_pos = self.initPos[SERVO_WHEEL] - int(coe * 100 * self.sc_direction[2])
-        pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[2], self.minPos[2])
+        pwm2_pos = self.initPos[SERVO_WHEEL] - int(coe * 100 * self.sc_direction[SERVO_WHEEL])
+        pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[SERVO_WHEEL], self.minPos[SERVO_WHEEL])
         self.robot_light.both_off()
         self.robot_light.yellow()
         self.pwm.set_pwm(SERVO_WHEEL, 0, pwm2_pos)
@@ -570,11 +570,11 @@ def main():
         # time.sleep(1)
         print(sc.radar_scan())
         sc.turnLeft()
-        time.sleep(2)
+        time.sleep(6)
         sc.turnRight()
-        time.sleep(2)
+        time.sleep(6)
         sc.turnMiddle()
-        time.sleep(2)
+        time.sleep(6)
     except KeyboardInterrupt:
         print("Measurement stopped by user")
     finally:
