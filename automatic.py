@@ -7,7 +7,7 @@ import os
 
 
 curpath = os.path.relpath(__file__)
-thisPath = '/'+os.path.dirname(curpath)
+thisPath = os.path.dirname(curpath)
 
 def num_import_int(initial):        
     global r
