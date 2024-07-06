@@ -562,7 +562,7 @@ def main():
         time.sleep(2)
         sc.autoSpeed([0, 1], [45, -45])
         time.sleep(2)
-        sc.certSpeed([0, 1], [30, -30], [5, 5])
+        sc.certSpeed([0, 1], [30, -30], [50, 50])
         time.sleep(2)
         sc.singleServo(0, 1, 5)
         time.sleep(2)
