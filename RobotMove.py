@@ -257,6 +257,14 @@ def main():
         print(f"Stopping motors")
         robot.move(0, 'none')
         time.sleep(1)
+        
+        print(f"Moving forward at speed 50")
+        robot.move(50, 'forward')
+        time.sleep(5)
+        
+        print(f"Stopping motors")
+        robot.move(0, 'none')
+        time.sleep(1)
 
         print("Test complete")
 
