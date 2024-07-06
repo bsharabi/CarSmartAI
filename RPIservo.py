@@ -409,10 +409,10 @@ def main():
     sc.start()
 
     try:
-        # # Test turn_left function
-        # print("Turning left")
-        # sc.turn_left()
-        # time.sleep(1)
+        # Test turn_left function
+        print("Turning left")
+        sc.turn_left()
+        time.sleep(1)
 
         # Test turn_right function
         print("Turning right")
