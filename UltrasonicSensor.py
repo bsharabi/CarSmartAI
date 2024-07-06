@@ -55,7 +55,7 @@ class UltrasonicSensor:
             self._send_pulse()
             distance = self._measure_distance()
             if distance < 9:  # Assuming valid readings are less than 9 meters
-                return round(distance, 2)
+                return round(distance, 2)*100
         return None
 
     def cleanup(self):
@@ -69,7 +69,7 @@ if __name__ == '__main__':
     
     try:
         while True:
-            distance = sensor.get_distance()*100
+            distance = sensor.get_distance()
             if distance is not None:
                 print(f"{distance:.2f} cm")
             else:
