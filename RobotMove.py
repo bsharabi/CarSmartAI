@@ -216,6 +216,7 @@ def main():
     except KeyboardInterrupt:
         print("Measurement stopped by user")
     finally:
+        print("hello")
         robot.cleanup()
         robot.join()  # Ensure the thread is properly terminated
 
