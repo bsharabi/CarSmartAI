@@ -57,6 +57,7 @@ scanRange = 100
 rangeKeep = 0.7
 
 sensor = UltrasonicSensor(trigger_pin=11, echo_pin=8)
+move.setup()
 
 while True:
     if scanPos == 1:
