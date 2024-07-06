@@ -1,6 +1,6 @@
 from __future__ import division
 import time
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO  # type: ignore
 import Adafruit_PCA9685
 import threading
 import random
@@ -375,8 +375,7 @@ class ServoCtrl(threading.Thread):
         """
         pwm2_pos = self.initPos[SERVO_WHEEL] + int(coe * 100 * self.sc_direction[SERVO_WHEEL])
         pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[SERVO_WHEEL], self.minPos[SERVO_WHEEL])
-        self.robot_light.both_off()
-        self.robot_light.yellow()
+        self.robot_light.turn_left()
         self.pwm.set_pwm(SERVO_WHEEL, 0, pwm2_pos)
 
     def turnRight(self, coe=1):
@@ -387,8 +386,7 @@ class ServoCtrl(threading.Thread):
         """
         pwm2_pos = self.initPos[SERVO_WHEEL] - int(coe * 100 * self.sc_direction[SERVO_WHEEL])
         pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[SERVO_WHEEL], self.minPos[SERVO_WHEEL])
-        self.robot_light.both_off()
-        self.robot_light.yellow()
+        self.robot_light.turn_right()
         self.pwm.set_pwm(SERVO_WHEEL, 0, pwm2_pos)
 
     def turnMiddle(self):
