@@ -69,7 +69,7 @@ if __name__ == '__main__':
     
     try:
         while True:
-            distance = sensor.get_distance()
+            distance = sensor.get_distance()*100
             if distance is not None:
                 print(f"{distance:.2f} cm")
             else:
