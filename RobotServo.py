@@ -56,6 +56,7 @@ class ServoCtrl(threading.Thread):
             self.wiggleDirection = 1
 
             self.robot_light = RobotLight()
+            self.robot_light.start()
             self.ultrasonic_sensor = UltrasonicSensor()
 
             self.initialized = True
