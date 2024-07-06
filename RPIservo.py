@@ -412,17 +412,17 @@ def main():
         # Test turn_left function
         print("Turning left")
         sc.turn_left()
-        time.sleep(1)
+        time.sleep(2)
 
         # Test turn_right function
         print("Turning right")
         sc.turn_right()
-        time.sleep(1)
+        time.sleep(2)
 
         # # Test turn_middle function
-        # print("Turning to middle")
-        # sc.turn_middle()
-        # time.sleep(1)
+        print("Turning to middle")
+        sc.turn_middle()
+        time.sleep(2)
 
         # # Test radar_scan function (assuming UltrasonicSensor class is defined)
         # from UltrasonicSensor import UltrasonicSensor
