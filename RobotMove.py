@@ -81,7 +81,7 @@ class RobotMove(threading.Thread):
             self.pwm_B = GPIO.PWM(self.Motor_B_EN, self.pwm_freq)
         except Exception as e:
             print(f"Error setting up GPIO: {e}")
-            self.terminate()
+            self.__terminate.set()
 
     def motor_stop(self):
         """
@@ -96,7 +96,6 @@ class RobotMove(threading.Thread):
             GPIO.output(self.Motor_B_EN, GPIO.LOW)
         except Exception as e:
             print(f"Error stopping motors: {e}")
-            self.terminate()
 
     def __motor_A(self, direction, speed):
         """
@@ -117,7 +116,7 @@ class RobotMove(threading.Thread):
             self.pwm_A.ChangeDutyCycle(speed)
         except Exception as e:
             print(f"Error controlling motor A: {e}")
-            self.terminate()
+            self.__terminate.set()
 
     def __motor_B(self, direction, speed):
         """
@@ -138,7 +137,7 @@ class RobotMove(threading.Thread):
             self.pwm_B.ChangeDutyCycle(speed)
         except Exception as e:
             print(f"Error controlling motor B: {e}")
-            self.terminate()
+            self.__terminate.set()
     
     def log_state_change(self):
         """
