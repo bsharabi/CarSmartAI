@@ -195,14 +195,14 @@ def main():
     robot.start()  # Start the thread
 
     try:
-        for i in range(10,100):
+        for i in range(0,100,10):
             print("Moving forward speed "+i)
             robot.move(i, 'forward')
-            time.sleep(1.3)
+            time.sleep(1)
         
-        for i in range(10,100):
+        for i in range(0,100,10):
             print("Moving backward speed "+i)
-            robot.move(100, 'backward')
+            robot.move(i, 'backward')
             time.sleep(1)
 
         # Additional tests
