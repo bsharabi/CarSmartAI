@@ -1,10 +1,12 @@
 import time
-import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO # type: ignore
+import argparse
 import sys
-from rpi_ws281x import *
+from rpi_ws281x import * # type: ignore
 import threading
 
 class RobotLight(threading.Thread):
+    
     def __init__(self, *args, **kwargs):
         """
         Initialize the RobotLight class with configuration parameters for the LEDs and GPIO pins.
@@ -31,7 +33,13 @@ class RobotLight(threading.Thread):
         self.right_R = 10
         self.right_G = 9
         self.right_B = 25
-
+        
+        
+        self.pin_led_1 = 5
+        self.pin_led_2 = 6
+        self.pin_led_3 = 13
+        
+    
         # GPIO output states
         self.on = GPIO.LOW
         self.off = GPIO.HIGH
@@ -39,22 +47,10 @@ class RobotLight(threading.Thread):
         # Current light mode: 'none', 'police', 'breath'
         self.lightMode = 'none'
 
-        # GPIO setup
-        GPIO.setwarnings(False)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(5, GPIO.OUT)
-        GPIO.setup(6, GPIO.OUT)
-        GPIO.setup(13, GPIO.OUT)
-
-        GPIO.setup(self.left_R, GPIO.OUT)
-        GPIO.setup(self.left_G, GPIO.OUT)
-        GPIO.setup(self.left_B, GPIO.OUT)
-        GPIO.setup(self.right_R, GPIO.OUT)
-        GPIO.setup(self.right_G, GPIO.OUT)
-        GPIO.setup(self.right_B, GPIO.OUT)
+        self.setup()
 
         # Create NeoPixel object with appropriate configuration.
-        self.strip = Adafruit_NeoPixel(self.LED_COUNT, self.LED_PIN, self.LED_FREQ_HZ, self.LED_DMA, self.LED_INVERT, self.LED_BRIGHTNESS, self.LED_CHANNEL)
+        self.strip = Adafruit_NeoPixel(self.LED_COUNT, self.LED_PIN, self.LED_FREQ_HZ, self.LED_DMA, self.LED_INVERT, self.LED_BRIGHTNESS, self.LED_CHANNEL) # type: ignore
         # Initialize the library (must be called once before other functions).
         self.strip.begin()
 
@@ -62,6 +58,25 @@ class RobotLight(threading.Thread):
         self.__flag = threading.Event()
         self.__flag.clear()
 
+    def setup(self):
+        """
+        Set up the GPIO pins and turn off both RGB LEDs.
+        """
+                # GPIO setup
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(self.pin_led_1, GPIO.OUT)
+        GPIO.setup(self.pin_led_2,GPIO.OUT)
+        GPIO.setup(self.pin_led_3, GPIO.OUT)
+
+        GPIO.setup(self.left_R, GPIO.OUT)
+        GPIO.setup(self.left_G, GPIO.OUT)
+        GPIO.setup(self.left_B, GPIO.OUT)
+        GPIO.setup(self.right_R, GPIO.OUT)
+        GPIO.setup(self.right_G, GPIO.OUT)
+        GPIO.setup(self.right_B, GPIO.OUT)
+        self.both_off()
+        
     def both_off(self):
         """
         Turn off both left and right RGB LEDs.
@@ -83,7 +98,7 @@ class RobotLight(threading.Thread):
         GPIO.output(self.right_R, self.on)
         GPIO.output(self.right_G, self.on)
         GPIO.output(self.right_B, self.on)
-
+        
     def side_on(self, side_X):
         """
         Turn on a specific side RGB LED.
@@ -164,7 +179,7 @@ class RobotLight(threading.Thread):
         :param G: Green component (0-255)
         :param B: Blue component (0-255)
         """
-        color = Color(int(R), int(G), int(B))
+        color = Color(int(R), int(G), int(B)) # type: ignore
         for i in range(self.strip.numPixels()):
             self.strip.setPixelColor(i, color)
             self.strip.show()
@@ -178,7 +193,7 @@ class RobotLight(threading.Thread):
         :param B: Blue component (0-255)
         :param IDs: List of LED IDs to set the color
         """
-        color = Color(int(R), int(G), int(B))
+        color = Color(int(R), int(G), int(B)) # type: ignore
         for i in IDs:
             self.strip.setPixelColor(i, color)
             self.strip.show()
@@ -279,11 +294,11 @@ class RobotLight(threading.Thread):
         :param status: 1 to turn on, 0 to turn off
         """
         if port == 1:
-            GPIO.output(5, GPIO.HIGH if status == 1 else GPIO.LOW)
+            GPIO.output(self.pin_led_1, GPIO.HIGH if status == 1 else GPIO.LOW)
         elif port == 2:
-            GPIO.output(6, GPIO.HIGH if status == 1 else GPIO.LOW)
+            GPIO.output(self.pin_led_2, GPIO.HIGH if status == 1 else GPIO.LOW)
         elif port == 3:
-            GPIO.output(13, GPIO.HIGH if status == 1 else GPIO.LOW)
+            GPIO.output(self.pin_led_3, GPIO.HIGH if status == 1 else GPIO.LOW)
         else:
             print('Wrong Command: Example--switch(3, 1)->to switch on port3')
 
@@ -294,7 +309,7 @@ class RobotLight(threading.Thread):
         self.switch(1, 0)
         self.switch(2, 0)
         self.switch(3, 0)
-
+        
     def headLight(self, switch):
         """
         Control the head light.
@@ -335,3 +350,4 @@ if __name__ == '__main__':
     RL.frontLight('off')
     time.sleep(2)
     RL.police()
+
