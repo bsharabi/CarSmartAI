@@ -143,6 +143,7 @@ class RobotMove(threading.Thread):
                           'backward' - Moves the robot backward.
                           'none' - Stops the robot.
         """
+        self.pause()
         self.speed = speed
         self.mode = direction
         self.mc = False
