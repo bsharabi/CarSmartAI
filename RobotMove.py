@@ -89,7 +89,7 @@ class RobotMove:
         self.pwm_B.start(100)
         self.pwm_B.ChangeDutyCycle(speed)
 
-    def move(self, speed, direction, turn=None, radius=0.6):
+    def move(self, speed, direction):
         """
         Move the robot in the specified direction with optional turning.
 
@@ -99,23 +99,9 @@ class RobotMove:
         :param radius: Turning radius (0 < radius <= 1).
         """
         if direction == 'forward':
-            if turn == 'right':
-                self.motor_B(self.Dir_backward, int(speed * radius))
-                self.motor_A(self.Dir_forward, speed)
-            elif turn == 'left':
-                self.motor_B(self.Dir_forward, speed)
-                self.motor_A(self.Dir_backward, int(speed * radius))
-            else:
                 self.motor_A(self.Dir_forward, speed)
                 self.motor_B(self.Dir_forward, speed)
         elif direction == 'backward':
-            if turn == 'right':
-                self.motor_B(self.Dir_forward, int(speed * radius))
-                self.motor_A(self.Dir_backward, speed)
-            elif turn == 'left':
-                self.motor_B(self.Dir_backward, speed)
-                self.motor_A(self.Dir_forward, int(speed * radius))
-            else:
                 self.motor_A(self.Dir_backward, speed)
                 self.motor_B(self.Dir_backward, speed)
         elif direction == 'no':
@@ -134,13 +120,12 @@ def main():
 
     try:
         print("Moving forward")
-        robot.motor_B(1,50)
-        # robot.move(100, 'forward')
-        # time.sleep(1.3)
-        # robot.motor_stop()
+        robot.move(100, 'forward')
+        time.sleep(1.3)
+        robot.motor_stop()
         
-        # print("Moving Backward")
-        # robot.move(100, 'backward')
+        print("Moving Backward")
+        robot.move(100, 'backward')
         time.sleep(1.3)
         robot.motor_stop()
        
