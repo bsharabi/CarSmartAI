@@ -1,4 +1,4 @@
-import UltrasonicSensor
+from UltrasonicSensor import UltrasonicSensor
 import move 
 import time
 import Adafruit_PCA9685
