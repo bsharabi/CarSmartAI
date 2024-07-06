@@ -1,72 +1,79 @@
 import time
-import RPi.GPIO as GPIO # type: ignore
-import argparse
-import sys
-from rpi_ws281x import * # type: ignore
+import RPi.GPIO as GPIO  # type: ignore
+from rpi_ws281x import *  # type: ignore
 import threading
 
 class RobotLight(threading.Thread):
-    
+    """
+    A singleton class to control the lights of a robot using GPIO pins.
+    This class extends threading.Thread to allow asynchronous control.
+    """
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super(RobotLight, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self, *args, **kwargs):
-        """
-        Initialize the RobotLight class with configuration parameters for the LEDs and GPIO pins.
-        """
-        self.LED_COUNT = 16         # Number of LED pixels.
-        self.LED_PIN = 12           # GPIO pin connected to the pixels (18 uses PWM!).
-        self.LED_FREQ_HZ = 800000   # LED signal frequency in hertz (usually 800khz).
-        self.LED_DMA = 10           # DMA channel to use for generating signal (try 10).
-        self.LED_BRIGHTNESS = 255   # Set to 0 for darkest and 255 for brightest.
-        self.LED_INVERT = False     # True to invert the signal (when using NPN transistor level shift).
-        self.LED_CHANNEL = 0        # Set to '1' for GPIOs 13, 19, 41, 45 or 53.
+        if not hasattr(self, 'initialized'):  # To prevent reinitialization
+            super(RobotLight, self).__init__(*args, **kwargs)
+            self.LED_COUNT = 16         # Number of LED pixels.
+            self.LED_PIN = 12           # GPIO pin connected to the pixels (18 uses PWM!).
+            self.LED_FREQ_HZ = 800000   # LED signal frequency in hertz (usually 800khz).
+            self.LED_DMA = 10           # DMA channel to use for generating signal (try 10).
+            self.LED_BRIGHTNESS = 255   # Set to 0 for darkest and 255 for brightest.
+            self.LED_INVERT = False     # True to invert the signal (when using NPN transistor level shift).
+            self.LED_CHANNEL = 0        # Set to '1' for GPIOs 13, 19, 41, 45 or 53.
 
-        # Color breath settings
-        self.colorBreathR = 0
-        self.colorBreathG = 0
-        self.colorBreathB = 0
-        self.breathSteps = 10
+            # Color breath settings
+            self.colorBreathR = 0
+            self.colorBreathG = 0
+            self.colorBreathB = 0
+            self.breathSteps = 10
 
-        # GPIO pin definitions for left and right RGB LEDs
-        self.left_R = 22
-        self.left_G = 23
-        self.left_B = 24
+            # GPIO pin definitions for left and right RGB LEDs
+            self.left_R = 22
+            self.left_G = 23
+            self.left_B = 24
 
-        self.right_R = 10
-        self.right_G = 9
-        self.right_B = 25
-        
-        
-        self.pin_led_1 = 5
-        self.pin_led_2 = 6
-        self.pin_led_3 = 13
-        
-    
-        # GPIO output states
-        self.on = GPIO.LOW
-        self.off = GPIO.HIGH
+            self.right_R = 10
+            self.right_G = 9
+            self.right_B = 25
+            
+            self.pin_led_1 = 5
+            self.pin_led_2 = 6
+            self.pin_led_3 = 13
 
-        # Current light mode: 'none', 'police', 'breath'
-        self.lightMode = 'none'
+            # GPIO output states
+            self.on = GPIO.LOW
+            self.off = GPIO.HIGH
 
-        self.setup()
+            # Current light mode: 'none', 'police', 'breath'
+            self.lightMode = 'none'
 
-        # Create NeoPixel object with appropriate configuration.
-        self.strip = Adafruit_NeoPixel(self.LED_COUNT, self.LED_PIN, self.LED_FREQ_HZ, self.LED_DMA, self.LED_INVERT, self.LED_BRIGHTNESS, self.LED_CHANNEL) # type: ignore
-        # Initialize the library (must be called once before other functions).
-        self.strip.begin()
+            self.setup()
 
-        super(RobotLight, self).__init__(*args, **kwargs)
-        self.__flag = threading.Event()
-        self.__flag.clear()
+            # Create NeoPixel object with appropriate configuration.
+            self.strip = Adafruit_NeoPixel(self.LED_COUNT, self.LED_PIN, self.LED_FREQ_HZ, self.LED_DMA, self.LED_INVERT, self.LED_BRIGHTNESS, self.LED_CHANNEL)  # type: ignore
+            # Initialize the library (must be called once before other functions).
+            self.strip.begin()
+
+            self.__flag = threading.Event()
+            self.__flag.clear()
+            
+            self.initialized = True
 
     def setup(self):
         """
         Set up the GPIO pins and turn off both RGB LEDs.
         """
-                # GPIO setup
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
         GPIO.setup(self.pin_led_1, GPIO.OUT)
-        GPIO.setup(self.pin_led_2,GPIO.OUT)
+        GPIO.setup(self.pin_led_2, GPIO.OUT)
         GPIO.setup(self.pin_led_3, GPIO.OUT)
 
         GPIO.setup(self.left_R, GPIO.OUT)
@@ -76,7 +83,7 @@ class RobotLight(threading.Thread):
         GPIO.setup(self.right_G, GPIO.OUT)
         GPIO.setup(self.right_B, GPIO.OUT)
         self.both_off()
-        
+
     def both_off(self):
         """
         Turn off both left and right RGB LEDs.
@@ -98,7 +105,7 @@ class RobotLight(threading.Thread):
         GPIO.output(self.right_R, self.on)
         GPIO.output(self.right_G, self.on)
         GPIO.output(self.right_B, self.on)
-        
+
     def side_on(self, side_X):
         """
         Turn on a specific side RGB LED.
@@ -179,10 +186,10 @@ class RobotLight(threading.Thread):
         :param G: Green component (0-255)
         :param B: Blue component (0-255)
         """
-        color = Color(int(R), int(G), int(B)) # type: ignore
+        color = Color(int(R), int(G), int(B))  # type: ignore
         for i in range(self.strip.numPixels()):
             self.strip.setPixelColor(i, color)
-            self.strip.show()
+        self.strip.show()
 
     def setSomeColor(self, R, G, B, IDs):
         """
@@ -193,10 +200,10 @@ class RobotLight(threading.Thread):
         :param B: Blue component (0-255)
         :param IDs: List of LED IDs to set the color
         """
-        color = Color(int(R), int(G), int(B)) # type: ignore
+        color = Color(int(R), int(G), int(B))  # type: ignore
         for i in IDs:
             self.strip.setPixelColor(i, color)
-            self.strip.show()
+        self.strip.show()
 
     def pause(self):
         """
@@ -339,7 +346,7 @@ class RobotLight(threading.Thread):
         while True:
             self.__flag.wait()
             self.lightChange()
-            pass
+
 
 if __name__ == '__main__':
     RL = RobotLight()
@@ -350,4 +357,3 @@ if __name__ == '__main__':
     RL.frontLight('off')
     time.sleep(2)
     RL.police()
-
