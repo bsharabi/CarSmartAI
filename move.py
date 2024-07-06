@@ -1,9 +1,6 @@
 import time
 import RPi.GPIO as GPIO # type: ignore
 
-# motor_EN_A: Pin7  |  motor_EN_B: Pin11
-# motor_A:  Pin8,Pin10    |  motor_B: Pin13,Pin12
-
 Motor_A_EN    = 4
 Motor_B_EN    = 17
 
@@ -12,28 +9,19 @@ Motor_A_Pin2  = 15
 Motor_B_Pin1  = 27
 Motor_B_Pin2  = 18
 
-Dir_forward   = 1
-Dir_backward  = 0
+Dir_forward   = 0
+Dir_backward  = 1
 
-left_forward  = 1
-left_backward = 0
+left_forward  = 0
+left_backward = 1
 
-right_forward = 1
-right_backward= 0
+right_forward = 0
+right_backward= 1
 
 pwn_A = 0
 pwm_B = 0
 
-def motorStop():#Motor stops
-	GPIO.output(Motor_A_Pin1, GPIO.LOW)
-	GPIO.output(Motor_A_Pin2, GPIO.LOW)
-	GPIO.output(Motor_B_Pin1, GPIO.LOW)
-	GPIO.output(Motor_B_Pin2, GPIO.LOW)
-	GPIO.output(Motor_A_EN, GPIO.LOW)
-	GPIO.output(Motor_B_EN, GPIO.LOW)
-
-
-def setup():#Motor initialization
+def setup():
 	global pwm_A, pwm_B
 	GPIO.setwarnings(False)
 	GPIO.setmode(GPIO.BCM)
@@ -51,7 +39,15 @@ def setup():#Motor initialization
 	except:
 		pass
 
-
+def motorStop():#Motor stops
+	GPIO.output(Motor_A_Pin1, GPIO.LOW)
+	GPIO.output(Motor_A_Pin2, GPIO.LOW)
+	GPIO.output(Motor_B_Pin1, GPIO.LOW)
+	GPIO.output(Motor_B_Pin2, GPIO.LOW)
+	GPIO.output(Motor_A_EN, GPIO.LOW)
+	GPIO.output(Motor_B_EN, GPIO.LOW)
+ 
+ 
 def motor_left(status, direction, speed):#Motor 2 positive and negative rotation
 	if status == 0: # stop
 		GPIO.output(Motor_B_Pin1, GPIO.LOW)
@@ -124,21 +120,19 @@ def move(speed, direction, turn, radius=0.6):   # 0 < radius <= 1
 		pass
 
 
-
-
 def destroy():
 	motorStop()
 	GPIO.cleanup()         
 
 
-# if __name__ == '__main__':
-# 	try:
-# 		speed_set = 60
-# 		setup()
-# 		move(speed_set, 'forward', 'no', 0.8)
-# 		time.sleep(1.3)
-# 		motorStop()
-# 		destroy()
-# 	except KeyboardInterrupt:
-# 		destroy()
+if __name__ == '__main__':
+	try:
+		speed_set = 60
+		setup()
+		move(speed_set, 'forward', 'no', 0.8)
+		time.sleep(1.3)
+		motorStop()
+		destroy()
+	except KeyboardInterrupt:
+		destroy()
 
