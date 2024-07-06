@@ -411,18 +411,18 @@ def main():
     try:
         # Test turn_left function
         print("Turning left")
-        sc.turn_left()
-        time.sleep(2)
+        sc.move_angle(2,45)
+        time.sleep(1)
 
         # Test turn_right function
         print("Turning right")
-        sc.turn_right()
-        time.sleep(2)
+        sc.move_angle(2,-45)
+        time.sleep(1)
 
-        # # Test turn_middle function
+        # Test turn_middle function
         print("Turning to middle")
-        sc.turn_middle()
-        time.sleep(2)
+        sc.move_angle(2,0)
+        time.sleep(1)
 
         # # Test radar_scan function (assuming UltrasonicSensor class is defined)
         # from UltrasonicSensor import UltrasonicSensor
@@ -436,10 +436,10 @@ def main():
         # direction = sc.get_direction(1)
         # print("Direction:", direction)
 
-        # Test move_angle function
-        print("Moving servo 1 to 45 degrees")
-        sc.move_angle(1, 45)
-        time.sleep(1)
+        # # Test move_angle function
+        # print("Moving servo 1 to 45 degrees")
+        # sc.move_angle(1, 45)
+        # time.sleep(1)
 
         # # Test single_servo function
         # print("Wiggling servo 1")
