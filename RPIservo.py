@@ -416,7 +416,7 @@ def main():
 
         # Test turn_right function
         print("Turning right")
-        sc.turn_right(-1)
+        sc.turn_right()
         time.sleep(1)
 
         # Test turn_middle function
