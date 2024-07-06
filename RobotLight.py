@@ -2,6 +2,7 @@ import time
 import RPi.GPIO as GPIO  # type: ignore
 from rpi_ws281x import *  # type: ignore
 import threading
+import settings
 
 class RobotLight(threading.Thread):
     """
@@ -20,13 +21,13 @@ class RobotLight(threading.Thread):
     def __init__(self, *args, **kwargs):
         if not hasattr(self, 'initialized'):  # To prevent reinitialization
             super(RobotLight, self).__init__(*args, **kwargs)
-            self.LED_COUNT = 16         # Number of LED pixels.
-            self.LED_PIN = 12           # GPIO pin connected to the pixels (18 uses PWM!).
-            self.LED_FREQ_HZ = 800000   # LED signal frequency in hertz (usually 800khz).
-            self.LED_DMA = 10           # DMA channel to use for generating signal (try 10).
-            self.LED_BRIGHTNESS = 255   # Set to 0 for darkest and 255 for brightest.
-            self.LED_INVERT = False     # True to invert the signal (when using NPN transistor level shift).
-            self.LED_CHANNEL = 0        # Set to '1' for GPIOs 13, 19, 41, 45 or 53.
+            self.LED_COUNT = settings.NEOPIXEL_LED_COUNT
+            self.LED_PIN = settings.NEOPIXEL_PIN
+            self.LED_FREQ_HZ = settings.NEOPIXEL_FREQ_HZ
+            self.LED_DMA = settings.NEOPIXEL_DMA
+            self.LED_BRIGHTNESS = settings.NEOPIXEL_BRIGHTNESS
+            self.LED_INVERT = settings.NEOPIXEL_INVERT
+            self.LED_CHANNEL = settings.NEOPIXEL_CHANNEL
 
             # Color breath settings
             self.colorBreathR = 0
@@ -35,17 +36,17 @@ class RobotLight(threading.Thread):
             self.breathSteps = 10
 
             # GPIO pin definitions for left and right RGB LEDs
-            self.left_R = 22
-            self.left_G = 23
-            self.left_B = 24
+            self.left_R = settings.LEFT_R_PIN
+            self.left_G = settings.LEFT_G_PIN
+            self.left_B = settings.LEFT_B_PIN
 
-            self.right_R = 10
-            self.right_G = 9
-            self.right_B = 25
+            self.right_R = settings.RIGHT_R_PIN
+            self.right_G = settings.RIGHT_G_PIN
+            self.right_B = settings.RIGHT_B_PIN
             
-            self.pin_led_1 = 5
-            self.pin_led_2 = 6
-            self.pin_led_3 = 13
+            self.pin_led_1 = settings.FRONT_LIGHT_PIN_1
+            self.pin_led_2 = settings.FRONT_LIGHT_PIN_2
+            self.pin_led_3 = settings.FRONT_LIGHT_PIN_3
 
             # GPIO output states
             self.on = GPIO.LOW
@@ -348,12 +349,12 @@ class RobotLight(threading.Thread):
             self.lightChange()
 
 
-# if __name__ == '__main__':
-#     RL = RobotLight()
-#     RL.start()
-#     RL.breath(70, 70, 255)
-#     time.sleep(15)
-#     RL.pause()
-#     RL.frontLight('off')
-#     time.sleep(2)
-#     RL.police()
+if __name__ == '__main__':
+    RL = RobotLight()
+    RL.start()
+    RL.breath(70, 70, 255)
+    time.sleep(15)
+    RL.pause()
+    RL.frontLight('off')
+    time.sleep(2)
+    RL.police()

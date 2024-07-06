@@ -3,10 +3,9 @@ import time
 import RPi.GPIO as GPIO  # type: ignore
 import Adafruit_PCA9685
 import threading
-import random
 from UltrasonicSensor import UltrasonicSensor
 from RobotLight import RobotLight
-from settings import *
+import settings
 
 class ServoCtrl(threading.Thread):
     """
@@ -27,17 +26,17 @@ class ServoCtrl(threading.Thread):
             super(ServoCtrl, self).__init__()
 
             self.pwm = Adafruit_PCA9685.PCA9685()
-            self.pwm.set_pwm_freq(50)
+            self.pwm.set_pwm_freq(settings.PWM_FREQUENCY)
 
             # Servo configuration
-            self.initPos = [SERVO_INIT_POS] * 3
-            self.goalPos = [SERVO_INIT_POS] * 3
-            self.nowPos = [SERVO_INIT_POS] * 3
-            self.bufferPos = [float(SERVO_INIT_POS)] * 3
-            self.lastPos = [SERVO_INIT_POS] * 3
-            self.ingGoal = [SERVO_INIT_POS] * 3
-            self.maxPos = [SERVO_MAX_POS] * 3
-            self.minPos = [SERVO_MIN_POS] * 3
+            self.initPos = [settings.SERVO_INIT_POS] * 3
+            self.goalPos = [settings.SERVO_INIT_POS] * 3
+            self.nowPos = [settings.SERVO_INIT_POS] * 3
+            self.bufferPos = [float(settings.SERVO_INIT_POS)] * 3
+            self.lastPos = [settings.SERVO_INIT_POS] * 3
+            self.ingGoal = [settings.SERVO_INIT_POS] * 3
+            self.maxPos = [settings.SERVO_MAX_POS] * 3
+            self.minPos = [settings.SERVO_MIN_POS] * 3
             self.scSpeed = [0] * 3
             self.sc_direction = [1] * 3
 
@@ -58,6 +57,7 @@ class ServoCtrl(threading.Thread):
             self.robot_light = RobotLight()
             self.robot_light.start()
             self.ultrasonic_sensor = UltrasonicSensor()
+            self.ultrasonic_sensor.start()
 
             self.initialized = True
             self.__flag = threading.Event()
@@ -374,10 +374,10 @@ class ServoCtrl(threading.Thread):
 
         :param coe: Coefficient for turning
         """
-        pwm2_pos = self.initPos[SERVO_WHEEL] + int(coe * 100 * self.sc_direction[SERVO_WHEEL])
-        pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[SERVO_WHEEL], self.minPos[SERVO_WHEEL])
+        pwm2_pos = self.initPos[settings.SERVO_WHEEL] + int(coe * 100 * self.sc_direction[settings.SERVO_WHEEL])
+        pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[settings.SERVO_WHEEL], self.minPos[settings.SERVO_WHEEL])
         self.robot_light.turn_left()
-        self.pwm.set_pwm(SERVO_WHEEL, 0, pwm2_pos)
+        self.pwm.set_pwm(settings.SERVO_WHEEL, 0, pwm2_pos)
 
     def turnRight(self, coe=1):
         """
@@ -385,18 +385,18 @@ class ServoCtrl(threading.Thread):
 
         :param coe: Coefficient for turning
         """
-        pwm2_pos = self.initPos[SERVO_WHEEL] - int(coe * 100 * self.sc_direction[SERVO_WHEEL])
-        pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[SERVO_WHEEL], self.minPos[SERVO_WHEEL])
+        pwm2_pos = self.initPos[settings.SERVO_WHEEL] - int(coe * 100 * self.sc_direction[settings.SERVO_WHEEL])
+        pwm2_pos = self.ctrl_range(pwm2_pos, self.maxPos[settings.SERVO_WHEEL], self.minPos[settings.SERVO_WHEEL])
         self.robot_light.turn_right()
-        self.pwm.set_pwm(SERVO_WHEEL, 0, pwm2_pos)
+        self.pwm.set_pwm(settings.SERVO_WHEEL, 0, pwm2_pos)
 
     def turnMiddle(self):
         """
         Turn to the middle position.
         """
-        pwm2_pos = self.initPos[SERVO_WHEEL]
+        pwm2_pos = self.initPos[settings.SERVO_WHEEL]
         self.robot_light.both_on()
-        self.pwm.set_pwm(SERVO_WHEEL, 0, pwm2_pos)
+        self.pwm.set_pwm(settings.SERVO_WHEEL, 0, pwm2_pos)
 
     def setPWMDirect(self, num, pos):
         """
@@ -417,34 +417,34 @@ class ServoCtrl(threading.Thread):
         """
         scan_result = 'U: '
         scan_speed = 1
-        pwm1_pos = self.initPos[SERVO_MID_HEAD]
+        pwm1_pos = self.initPos[settings.SERVO_MID_HEAD]
         self.robot_light.cyan()
-        if self.sc_direction[SERVO_MID_HEAD]:
-            pwm1_pos = self.maxPos[SERVO_MID_HEAD]
-            self.pwm.set_pwm(SERVO_MID_HEAD, 0, pwm1_pos)
+        if self.sc_direction[settings.SERVO_MID_HEAD]:
+            pwm1_pos = self.maxPos[settings.SERVO_MID_HEAD]
+            self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
             time.sleep(0.5)
             scan_result += str(self.ultrasonic_sensor.get_distance())
             scan_result += ' '
-            while pwm1_pos > self.minPos[SERVO_MID_HEAD]:
+            while pwm1_pos > self.minPos[settings.SERVO_MID_HEAD]:
                 pwm1_pos -= scan_speed
-                self.pwm.set_pwm(SERVO_MID_HEAD, 0, pwm1_pos)
+                self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
                 scan_result += str(self.ultrasonic_sensor.get_distance())
                 scan_result += ' '
-            self.pwm.set_pwm(SERVO_MID_HEAD, 0, self.initPos[SERVO_MID_HEAD])
-            pwm1_pos = self.initPos[SERVO_MID_HEAD]
+            self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, self.initPos[settings.SERVO_MID_HEAD])
+            pwm1_pos = self.initPos[settings.SERVO_MID_HEAD]
         else:
-            pwm1_pos = self.minPos[SERVO_MID_HEAD]
-            self.pwm.set_pwm(SERVO_MID_HEAD, 0, pwm1_pos)
+            pwm1_pos = self.minPos[settings.SERVO_MID_HEAD]
+            self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
             time.sleep(0.5)
             scan_result += str(self.ultrasonic_sensor.get_distance())
             scan_result += ' '
-            while pwm1_pos < self.maxPos[SERVO_MID_HEAD]:
+            while pwm1_pos < self.maxPos[settings.SERVO_MID_HEAD]:
                 pwm1_pos += scan_speed
-                self.pwm.set_pwm(SERVO_MID_HEAD, 0, pwm1_pos)
+                self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
                 scan_result += str(self.ultrasonic_sensor.get_distance())
                 scan_result += ' '
-            self.pwm.set_pwm(SERVO_MID_HEAD, 0, self.initPos[SERVO_MID_HEAD])
-            pwm1_pos = self.initPos[SERVO_MID_HEAD]
+            self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, self.initPos[settings.SERVO_MID_HEAD])
+            pwm1_pos = self.initPos[settings.SERVO_MID_HEAD]
         self.robot_light.both_on()
         return scan_result
 
@@ -471,10 +471,10 @@ class ServoCtrl(threading.Thread):
 
         :param speed: Speed for looking left
         """
-        pwm1_pos = self.nowPos[SERVO_MID_HEAD] + speed * self.sc_direction[SERVO_MID_HEAD]
-        pwm1_pos = self.ctrl_range(pwm1_pos, self.maxPos[SERVO_MID_HEAD], self.minPos[SERVO_MID_HEAD])
-        self.pwm.set_pwm(SERVO_MID_HEAD, 0, pwm1_pos)
-        self.nowPos[1] = pwm1_pos
+        pwm1_pos = self.initPos[settings.SERVO_MID_HEAD]
+        pwm1_pos += speed * self.sc_direction[settings.SERVO_MID_HEAD]
+        pwm1_pos = self.ctrl_range(pwm1_pos, self.maxPos[settings.SERVO_MID_HEAD], self.minPos[settings.SERVO_MID_HEAD])
+        self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
 
     def lookRight(self, speed):
         """
@@ -482,10 +482,10 @@ class ServoCtrl(threading.Thread):
 
         :param speed: Speed for looking right
         """
-        pwm1_pos = self.nowPos[SERVO_MID_HEAD] - speed * self.sc_direction[SERVO_MID_HEAD]
-        pwm1_pos = self.ctrl_range(pwm1_pos, self.maxPos[SERVO_MID_HEAD], self.minPos[SERVO_MID_HEAD])
-        self.pwm.set_pwm(SERVO_MID_HEAD, 0, pwm1_pos)
-        self.nowPos[SERVO_MID_HEAD] = pwm1_pos
+        pwm1_pos = self.initPos[settings.SERVO_MID_HEAD]
+        pwm1_pos -= speed * self.sc_direction[settings.SERVO_MID_HEAD]
+        pwm1_pos = self.ctrl_range(pwm1_pos, self.maxPos[settings.SERVO_MID_HEAD], self.minPos[settings.SERVO_MID_HEAD])
+        self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
 
     def lookUp(self, speed):
         """
@@ -493,10 +493,10 @@ class ServoCtrl(threading.Thread):
 
         :param speed: Speed for looking up
         """
-        pwm0_pos = self.nowPos[SERVO_HEAD] - speed * self.sc_direction[SERVO_HEAD]
-        pwm0_pos = self.ctrl_range(pwm0_pos, self.maxPos[SERVO_HEAD], self.minPos[SERVO_HEAD])
-        self.pwm.set_pwm(SERVO_HEAD, 0, pwm0_pos)
-        self.nowPos[SERVO_HEAD] = pwm0_pos
+        pwm0_pos = self.initPos[settings.SERVO_HEAD]
+        pwm0_pos -= speed * self.sc_direction[settings.SERVO_HEAD]
+        pwm0_pos = self.ctrl_range(pwm0_pos, self.maxPos[settings.SERVO_HEAD], self.minPos[settings.SERVO_HEAD])
+        self.pwm.set_pwm(settings.SERVO_HEAD, 0, pwm0_pos)
 
     def lookDown(self, speed):
         """
@@ -504,47 +504,45 @@ class ServoCtrl(threading.Thread):
 
         :param speed: Speed for looking down
         """
-        pwm0_pos = self.nowPos[SERVO_HEAD] + speed * self.sc_direction[SERVO_HEAD]
-        pwm0_pos = self.ctrl_range(pwm0_pos, self.maxPos[SERVO_HEAD], self.minPos[SERVO_HEAD])
-        self.pwm.set_pwm(SERVO_HEAD, 0, pwm0_pos)
-        self.nowPos[SERVO_HEAD] = pwm0_pos
+        pwm0_pos = self.initPos[settings.SERVO_HEAD]
+        pwm0_pos += speed * self.sc_direction[settings.SERVO_HEAD]
+        pwm0_pos = self.ctrl_range(pwm0_pos, self.maxPos[settings.SERVO_HEAD], self.minPos[settings.SERVO_HEAD])
+        self.pwm.set_pwm(settings.SERVO_HEAD, 0, pwm0_pos)
 
     def servoInit(self):
         """
         Initialize all servos.
         """
         try:
-            self.pwm.set_all_pwm(0, 300)
+            self.pwm.set_all_pwm(0, settings.SERVO_INIT_POS)
         except Exception:
             pass
-        self.pwm.set_pwm(0, 0, self.initPos[SERVO_HEAD])
-        self.pwm.set_pwm(1, 0, self.initPos[SERVO_MID_HEAD])
-        self.pwm.set_pwm(2, 0, self.initPos[SERVO_WHEEL])
+        self.pwm.set_pwm(settings.SERVO_HEAD, 0, self.initPos[settings.SERVO_HEAD])
+        self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, self.initPos[settings.SERVO_MID_HEAD])
+        self.pwm.set_pwm(settings.SERVO_WHEEL, 0, self.initPos[settings.SERVO_WHEEL])
 
     def cleanAll(self):
         """
         Clean up all servo settings.
         """
-        self.pwm.set_pwm_freq(PWM_FREQUENCY)
+        self.pwm = Adafruit_PCA9685.PCA9685()
+        self.pwm.set_pwm_freq(settings.PWM_FREQUENCY)
         self.pwm.set_all_pwm(0, 0)
 
     def ahead(self):
         """
         Move servos to the ahead position.
         """
-        self.pwm.set_pwm(SERVO_MID_HEAD, 0, self.initPos[SERVO_MID_HEAD])
-        self.pwm.set_pwm(SERVO_HEAD, 0, self.initPos[SERVO_HEAD])
-        self.nowPos[SERVO_MID_HEAD] = self.initPos[SERVO_MID_HEAD]
-        self.nowPos[SERVO_HEAD] = self.initPos[SERVO_HEAD]
+        self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, self.initPos[settings.SERVO_MID_HEAD])
+        self.pwm.set_pwm(settings.SERVO_HEAD, 0, self.initPos[settings.SERVO_HEAD])
 
-    def getDirection(self,ID):
+    def getDirection(self):
         """
         Get the current direction.
 
         :return: Direction
         """
-        return self.nowPos[ID] - self.initPos[ID]
-
+        return self.initPos[settings.SERVO_MID_HEAD] - settings.SERVO_MID_HEAD
 
 def main():
     """
@@ -552,35 +550,32 @@ def main():
     """
     sc = ServoCtrl()
     sc.start()
-
+    
     # Example usage of various methods
     try:
-        pass
-        # sc.moveAngle(SERVO_HEAD, 30)
-        # time.sleep(2)
-        # sc.moveAngle(SERVO_MID_HEAD, -30)
-        # time.sleep(2)
-        # sc.autoSpeed([0, 1], [45, -45])
-        # time.sleep(2)
-        # sc.certSpeed([0, 1], [30, -30], [50, 50])
-        # time.sleep(2)
-        # # sc.singleServo(0, 1, 5)
-        # # time.sleep(2)
-        # # sc.singleServo(0, -1, 30)
-        # # time.sleep(1)
-        # print(sc.radar_scan())
-        # sc.turnLeft()
-        # time.sleep(6)
-        # sc.turnRight()
-        # time.sleep(6)
-        # sc.turnMiddle()
-        # time.sleep(6)
+        sc.moveAngle(settings.SERVO_HEAD, 30)
+        time.sleep(2)
+        sc.moveAngle(settings.SERVO_MID_HEAD, -30)
+        time.sleep(2)
+        sc.autoSpeed([settings.SERVO_HEAD, settings.SERVO_MID_HEAD], [45, -45])
+        time.sleep(2)
+        sc.certSpeed([settings.SERVO_HEAD, settings.SERVO_MID_HEAD], [30, -30], [5, 5])
+        time.sleep(2)
+        sc.singleServo(settings.SERVO_HEAD, 1, 5)
+        time.sleep(6)
+        sc.singleServo(settings.SERVO_HEAD, -1, 30)
+        time.sleep(1)
+        print(sc.radar_scan())
+        sc.turnLeft()
+        time.sleep(2)
+        sc.turnRight()
+        time.sleep(2)
+        sc.turnMiddle()
     except KeyboardInterrupt:
         print("Measurement stopped by user")
     finally:
         sc.terminate()
         sc.join()  # Ensure the thread is properly terminated
-
 
 if __name__ == '__main__':
     main()

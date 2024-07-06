@@ -222,57 +222,31 @@ class RobotMove(threading.Thread):
         """
         Run the thread to handle the movement process.
         """
-        print("Thread started")
         while not self.__terminate.is_set():
             self.__flag.wait()
             self.mode_change()
-
-    def check_motor_status(self):
-        """
-        Check and log the status of the motors.
-        """
-        try:
-            motor_a_status = GPIO.input(self.Motor_A_EN)
-            motor_b_status = GPIO.input(self.Motor_B_EN)
-
-            if motor_a_status == GPIO.LOW and motor_b_status == GPIO.LOW:
-                print("Both motors are stopped.")
-            elif motor_a_status == GPIO.HIGH and motor_b_status == GPIO.LOW:
-                print("Motor A is running, Motor B is stopped.")
-            elif motor_a_status == GPIO.LOW and motor_b_status == GPIO.HIGH:
-                print("Motor A is stopped, Motor B is running.")
-            else:
-                print("Both motors are running.")
-        except Exception as e:
-            print(f"Error checking motor status: {e}")
-
 
 def main():
     robot = RobotMove()
     robot.start()  # Start the thread
 
     try:
-        print(f"Moving forward at speed 50")
-        robot.move(50, 'forward')
-        time.sleep(2)
+        for i in range(10, 100, 10):
+            print(f"Moving forward at speed {i}")
+            robot.move(i, 'forward')
+            time.sleep(5)
+            robot.pause()
+            time.sleep(1)
         
-        print(f"Increasing speed to 80")
-        robot.move(80, 'forward')
-        time.sleep(2)
+        for i in range(10, 100, 10):
+            print(f"Moving backward at speed {i}")
+            robot.move(i, 'backward')
+            time.sleep(5)
+            robot.pause()
+            time.sleep(1)
 
-        print(f"Decreasing speed to 30")
-        robot.move(30, 'forward')
-        time.sleep(2)
-
-        print(f"Moving backward at speed 40")
-        robot.move(40, 'backward')
-        time.sleep(2)
-
-        print(f"Increasing speed to 70")
-        robot.move(70, 'backward')
-        time.sleep(2)
-
-        print(f"Stopping motors")
+        # Additional tests
+        print("Stopping motors")
         robot.move(0, 'none')
         time.sleep(1)
 
@@ -283,7 +257,6 @@ def main():
     finally:
         robot.terminate()
         robot.join()  # Ensure the thread is properly terminated
-
 
 if __name__ == '__main__':
     main()
