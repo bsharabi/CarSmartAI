@@ -254,23 +254,23 @@ def main():
     try:
         print(f"Moving forward at speed 50")
         robot.move(50, 'forward')
-        time.sleep(5)
+        time.sleep(2)
         
         print(f"Increasing speed to 80")
         robot.move(80, 'forward')
-        time.sleep(5)
+        time.sleep(2)
 
         print(f"Decreasing speed to 30")
         robot.move(30, 'forward')
-        time.sleep(5)
+        time.sleep(2)
 
         print(f"Moving backward at speed 40")
         robot.move(40, 'backward')
-        time.sleep(5)
+        time.sleep(2)
 
         print(f"Increasing speed to 70")
         robot.move(70, 'backward')
-        time.sleep(5)
+        time.sleep(2)
 
         print(f"Stopping motors")
         robot.move(0, 'none')
