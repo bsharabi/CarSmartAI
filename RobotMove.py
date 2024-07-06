@@ -103,6 +103,8 @@ class RobotMove(threading.Thread):
             GPIO.output(self.Motor_A_Pin1, GPIO.LOW)
             GPIO.output(self.Motor_A_Pin2, GPIO.HIGH)
 
+        GPIO.output(self.Motor_A_EN, GPIO.HIGH)
+        GPIO.output(self.Motor_B_EN, GPIO.HIGH)
         self.pwm_A.start(100)
         self.pwm_A.ChangeDutyCycle(speed)
 
@@ -120,6 +122,9 @@ class RobotMove(threading.Thread):
             GPIO.output(self.Motor_B_Pin1, GPIO.LOW)
             GPIO.output(self.Motor_B_Pin2, GPIO.HIGH)
 
+
+        GPIO.output(self.Motor_A_EN, GPIO.HIGH)
+        GPIO.output(self.Motor_B_EN, GPIO.HIGH)
         self.pwm_B.start(100)
         self.pwm_B.ChangeDutyCycle(speed)
     
