@@ -134,7 +134,7 @@ def main():
 
     try:
         print("Moving forward")
-        robot.motor_A(50,'forward')
+        robot.motor_A(1,50)
         # robot.move(100, 'forward')
         # time.sleep(1.3)
         # robot.motor_stop()
