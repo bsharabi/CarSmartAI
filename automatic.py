@@ -58,44 +58,47 @@ rangeKeep = 0.7
 
 sensor = UltrasonicSensor(trigger_pin=11, echo_pin=8)
 move.setup()
+try:
+    while True:
+        if scanPos == 1:
+            pwm.set_pwm(scanServo, 0, pwm1_init+scanRange)
+            time.sleep(0.3)
+            scanList[0] = sensor.get_distance()
+        elif scanPos == 2:
+            pwm.set_pwm(scanServo, 0, pwm1_init)
+            time.sleep(0.3)
+            scanList[1] = sensor.get_distance()
+        elif scanPos == 3:
+            pwm.set_pwm(scanServo, 0, pwm1_init-scanRange)
+            time.sleep(0.3)
+            scanList[2] = sensor.get_distance()
 
-while True:
-    if scanPos == 1:
-        pwm.set_pwm(scanServo, 0, pwm1_init+scanRange)
-        time.sleep(0.3)
-        scanList[0] = sensor.get_distance()
-    elif scanPos == 2:
-        pwm.set_pwm(scanServo, 0, pwm1_init)
-        time.sleep(0.3)
-        scanList[1] = sensor.get_distance()
-    elif scanPos == 3:
-        pwm.set_pwm(scanServo, 0, pwm1_init-scanRange)
-        time.sleep(0.3)
-        scanList[2] = sensor.get_distance()
+        scanPos += scanDir
 
-    scanPos += scanDir
+        if scanPos > scanNum or scanPos < 1:
+            if scanDir == 1:scanDir = -1
+            elif scanDir == -1:scanDir = 1
+            scanPos += scanDir*2
+        print(scanList)
 
-    if scanPos > scanNum or scanPos < 1:
-        if scanDir == 1:scanDir = -1
-        elif scanDir == -1:scanDir = 1
-        scanPos += scanDir*2
-    print(scanList)
-
-    if min(scanList) < rangeKeep:
-        if scanList.index(min(scanList)) == 0:
-            scGear.moveAngle(2, -30)
-        elif scanList.index(min(scanList)) == 1:
-            if scanList[0] < scanList[2]:
-                scGear.moveAngle(2, -45)
-            else:
-                scGear.moveAngle(2, 45)
-        elif scanList.index(min(scanList)) == 2:
-            scGear.moveAngle(2, 30)
-        if max(scanList) < rangeKeep or min(scanList) < rangeKeep/3:
-            move.motor_left(1, 1, 80)
-            move.motor_right(1, 1, 80)
-    else:
-        #move along
-        move.motor_left(1, 0, 80)
-        move.motor_right(1, 0, 80)
-        pass
+        if min(scanList) < rangeKeep:
+            if scanList.index(min(scanList)) == 0:
+                scGear.moveAngle(2, -30)
+            elif scanList.index(min(scanList)) == 1:
+                if scanList[0] < scanList[2]:
+                    scGear.moveAngle(2, -45)
+                else:
+                    scGear.moveAngle(2, 45)
+            elif scanList.index(min(scanList)) == 2:
+                scGear.moveAngle(2, 30)
+            if max(scanList) < rangeKeep or min(scanList) < rangeKeep/3:
+                move.motor_left(1, 1, 80)
+                move.motor_right(1, 1, 80)
+        else:
+            #move along
+            move.motor_left(1, 0, 80)
+            move.motor_right(1, 0, 80)
+            pass
+except KeyboardInterrupt: 
+    move.destroy()
+        
