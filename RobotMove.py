@@ -210,6 +210,7 @@ class RobotMove(threading.Thread):
         print("Thread started")
         while not self.__terminate.is_set():
             self.__flag.wait()
+            print("mode change")
             self.mode_change()
 
     def check_motor_status(self):
