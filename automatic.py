@@ -54,7 +54,7 @@ scanDir = 1
 scanList = [0,0,0]
 scanServo = 1
 scanRange = 100
-rangeKeep = 0.7
+rangeKeep = 70
 
 sensor = UltrasonicSensor(trigger_pin=11, echo_pin=8)
 move.setup()
