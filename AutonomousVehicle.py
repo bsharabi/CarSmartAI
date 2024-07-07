@@ -50,13 +50,6 @@ class AutonomousVehicle:
         self.ultrasonic_sensor.join()
         self.servo_ctrl.join()
 
-    def calculate_pid(self,current):
-        error = self.distance_threshold - current
-        self.integral += error
-        derivative = error - self.previous_error
-        self.previous_error = error
-        return self.kp * error + self.ki * self.integral + self.kd * derivative
-
     
     def obstacle_ahead_maneuver(self,control_signal, left , right ):
         turn_amount = 4 * control_signal
@@ -75,7 +68,6 @@ class AutonomousVehicle:
             left_distance, right_distance, top_distance, bottom_distance = self.scan_surroundings()
 
             print(f"Distances - Front: {front_distance}, Left: {left_distance}, Right: {right_distance}, Top: {top_distance}, Bottom: {bottom_distance}")
-            control_signal = self.calculate_pid(front_distance)
             if front_distance and front_distance < self.distance_threshold:
                 print("Obstacle detected in front!")
                 
