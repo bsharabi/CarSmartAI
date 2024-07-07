@@ -26,7 +26,7 @@ class AutonomousVehicle:
         self.robot_light.start()
         self.ultrasonic_sensor.start()
         self.servo_ctrl.start()
-        
+
         self.robot_light.setColor(0, 255, 0)  # Set lights to green to indicate start
         time.sleep(2)  # Wait for all systems to start
 
@@ -45,7 +45,7 @@ class AutonomousVehicle:
         self.robot_light.pause()
         self.ultrasonic_sensor.terminate()
         self.servo_ctrl.terminate()
-        
+
         self.robot_move.join()
         self.ultrasonic_sensor.join()
         self.servo_ctrl.join()
@@ -57,9 +57,9 @@ class AutonomousVehicle:
         """
         while True:
             front_distance = self.ultrasonic_sensor.get_distance()
-            
+
             if front_distance and front_distance < self.distance_threshold:
-    
+
                 print("Obstacle detected in front! scanning for solution")
 
                 # little pause for surroundings scan
@@ -67,27 +67,48 @@ class AutonomousVehicle:
                 left_distance, right_distance, top_distance, bottom_distance = self.scan_surroundings()
 
                 print(f"Distances - Front: {front_distance}, Left: {left_distance}, Right: {right_distance}, Top: {top_distance}, Bottom: {bottom_distance}")
-                
+
                 coe = self.PID.update(front_distance) # PID control to determine the turn coefficient
                 print(f'coe is : {coe}')
                 self.robot_light.setColor(255, 0, 0)  # Set lights to red to indicate obstacle
 
                 if left_distance > self.distance_threshold * 0.75 or right_distance > self.distance_threshold * 0.75:
                     if not right_distance or (left_distance and left_distance > right_distance):
-                        self.servo_ctrl.turnLeft(2 * coe)
-                        time.sleep(0.5)
-                        self.servo_ctrl.turnMiddle()
+                        self.servo_ctrl.moveAngle(2,-60)
                     else:
-                        self.servo_ctrl.turnRight(2 * coe)
-                        time.sleep(0.5)
-                        self.servo_ctrl.turnMiddle()
+                        self.servo_ctrl.moveAngle(2, 60)
                     self.robot_move.move(self.speed, 'forward')
+                    time.sleep(1)
+                    self.servo_ctrl.turnMiddle()
                 else:
                     # Reduce speed to avoid collision when moving backward
                     print("No clear path forward, moving backward.")
-                    self.robot_move.move(self.speed // 2 , 'backward')
-                    time.sleep(3)
-                    
+                    self.robot_move.move(self.speed, 'backward')
+                    time.sleep(1)
+                    left_distance, right_distance, top_distance, bottom_distance = self.scan_surroundings()
+                    coe = self.PID.update(front_distance) # PID control to determine the turn coefficient
+                    if left_distance > self.distance_threshold * 0.75 or right_distance > self.distance_threshold * 0.75:
+                        if not right_distance or (left_distance and left_distance > right_distance):
+                            self.servo_ctrl.moveAngle(2,-60)
+                        else:
+                            self.servo_ctrl.moveAngle(2, 60)
+                        self.robot_move.move(self.speed, 'forward')
+                        time.sleep(1)
+                        self.servo_ctrl.turnMiddle()
+                    else:
+                        print("No clear path forward, moving backward.")
+                        self.robot_move.move(self.speed, 'backward')
+                        time.sleep(1)
+                        left_distance, right_distance, top_distance, bottom_distance = self.scan_surroundings()
+                    coe = self.PID.update(front_distance) # PID control to determine the turn coefficient
+                    if left_distance > self.distance_threshold * 0.75 or right_distance > self.distance_threshold * 0.75:
+                        if not right_distance or (left_distance and left_distance > right_distance):
+                            self.servo_ctrl.moveAngle(2,-60)
+                        else:
+                            self.servo_ctrl.moveAngle(2, 60)
+                        self.robot_move.move(self.speed, 'forward')
+                        time.sleep(1)
+                        self.servo_ctrl.turnMiddle()
 
             else:
                 print("Path clear, moving forward.")
@@ -124,7 +145,7 @@ class AutonomousVehicle:
 
 def main():
     av = AutonomousVehicle()
-    try:    
+    try:
         av.start()
     except KeyboardInterrupt:
         print("Measurement stopped by user")
