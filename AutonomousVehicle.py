@@ -14,7 +14,7 @@ class AutonomousVehicle:
 
         self.distance_threshold = 50  # cm, distance threshold to consider an obstacle
         self.speed = 100  # initial speed
-        self.scan_delay = 0.5  # delay between scans
+        self.scan_delay = 0.3  # delay between scans
 
         self.PID = PID(Kp=1.0, Ki=0.0, Kd=0.1)
 
@@ -57,33 +57,37 @@ class AutonomousVehicle:
         """
         while True:
             front_distance = self.ultrasonic_sensor.get_distance()
+            # little pause for surroundings scan
+            self.robot_move.pause()
             left_distance, right_distance, top_distance, bottom_distance = self.scan_surroundings()
 
             print(f"Distances - Front: {front_distance}, Left: {left_distance}, Right: {right_distance}, Top: {top_distance}, Bottom: {bottom_distance}")
             if front_distance and front_distance < self.distance_threshold:
+                
                 print("Obstacle detected in front!")
                 
                 coe = self.PID.update(front_distance) # PID control to determine the turn coefficient
-                self.robot_move.pause()
+                
                 self.robot_light.setColor(255, 0, 0)  # Set lights to red to indicate obstacle
 
                 if left_distance > self.distance_threshold or right_distance > self.distance_threshold:
                     if not right_distance or (left_distance and left_distance > right_distance):
                         self.servo_ctrl.turnLeft(coe)
-                        time.sleep(1)
+                        time.sleep(0.5)
                         self.servo_ctrl.turnMiddle()
                     else:
                         self.servo_ctrl.turnRight(coe)
-                        time.sleep(1)
+                        time.sleep(0.5)
                         self.servo_ctrl.turnMiddle()
                     self.robot_move.move(self.speed, 'forward')
                 else:
+                    # Reduce speed to avoid collision when moving backward
                     print("No clear path forward, moving backward.")
-                    self.robot_move.move(self.speed, 'backward')
+                    self.robot_move.move(self.speed // 2, 'backward')
                     time.sleep(1)
                     self.robot_move.pause()
-                    # Reduce speed to avoid collision when moving backward
-                    self.robot_move.move(self.speed // 2, 'backward')
+                    
+                    
 
             else:
                 print("Path clear, moving forward.")
