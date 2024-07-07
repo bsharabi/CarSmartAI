@@ -97,14 +97,14 @@ class AutonomousVehicle:
         :return: Distances to the left, right, top, and bottom obstacles.
         """
         self.servo_ctrl.lookLeft(45)
-        time.sleep(0.5)
+        time.sleep(1)
         left_distance = self.ultrasonic_sensor.get_distance()
 
         self.servo_ctrl.lookRight(45)
         time.sleep(0.5)
         right_distance = self.ultrasonic_sensor.get_distance()
 
-        self.servo_ctrl.lookUp(45)
+        self.servo_ctrl.lookUp(0)
         time.sleep(0.5)
         top_distance = self.ultrasonic_sensor.get_distance()
 
