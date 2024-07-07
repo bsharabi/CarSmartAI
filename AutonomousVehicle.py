@@ -71,7 +71,7 @@ class AutonomousVehicle:
             if front_distance and front_distance < self.distance_threshold:
                 print("Obstacle detected in front!")
                 
-                coe = self.pid.update(front_distance) # PID control to determine the turn coefficient
+                coe = self.PID.update(front_distance) # PID control to determine the turn coefficient
                 self.robot_move.pause()
                 self.robot_light.setColor(255, 0, 0)  # Set lights to red to indicate obstacle
 
