@@ -50,14 +50,6 @@ class AutonomousVehicle:
         self.ultrasonic_sensor.join()
         self.servo_ctrl.join()
 
-    
-    def obstacle_ahead_maneuver(self,control_signal, left , right ):
-        turn_amount = 4 * control_signal
-        if left > right:
-            self.servo_ctrl.turnLeft(turn_amount)
-        else:
-            self.servo_ctrl.turnRight(turn_amount)
-    
 
     def autonomous_drive(self):
         """
@@ -78,8 +70,12 @@ class AutonomousVehicle:
                 if left_distance > self.distance_threshold or right_distance > self.distance_threshold:
                     if not right_distance or (left_distance and left_distance > right_distance):
                         self.servo_ctrl.turnLeft(coe)
+                        time.sleep(1)
+                        self.servo_ctrl.turnMiddle()
                     else:
                         self.servo_ctrl.turnRight(coe)
+                        time.sleep(1)
+                        self.servo_ctrl.turnMiddle()
                     self.robot_move.move(self.speed, 'forward')
                 else:
                     print("No clear path forward, moving backward.")
@@ -124,7 +120,15 @@ class AutonomousVehicle:
 
 def main():
     av = AutonomousVehicle()
-    av.start()
+    try:    
+        av.start()
+    except KeyboardInterrupt:
+        print("Measurement stopped by user")
+
+    finally:
+        av.cleanup()
+        av.join()  # Ensure the thread is properly terminated
+
 
 if __name__ == '__main__':
     main()
