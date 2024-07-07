@@ -95,4 +95,5 @@ if __name__ == '__main__':
         pass
     except KeyboardInterrupt:
         # move.destroy()
-
+        GPIO.cleanup()
+        pass
