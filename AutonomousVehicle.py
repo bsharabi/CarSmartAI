@@ -12,7 +12,7 @@ class AutonomousVehicle:
         self.ultrasonic_sensor = UltrasonicSensor()
         self.servo_ctrl = ServoCtrl()
 
-        self.distance_threshold = 30  # cm, distance threshold to consider an obstacle
+        self.distance_threshold = 50  # cm, distance threshold to consider an obstacle
         self.speed = 100  # initial speed
         self.scan_delay = 0.5  # delay between scans
 
