@@ -63,7 +63,7 @@ LINE_PIN_MIDDLE = 16
 LINE_PIN_RIGHT = 20
 
 # Motor settings
-MOTOR_SPEED = 75
+MOTOR_SPEED = 80
 
 # Servo settings
 ANGLE_RATE = 1
