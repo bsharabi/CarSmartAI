@@ -3,6 +3,7 @@ from RobotMove import RobotMove
 from RobotLight import RobotLight
 from UltrasonicSensor import UltrasonicSensor
 from ServoCtrl import ServoCtrl
+from PID import PID
 
 class AutonomousVehicle:
     def __init__(self):
@@ -14,6 +15,8 @@ class AutonomousVehicle:
         self.distance_threshold = 30  # cm, distance threshold to consider an obstacle
         self.speed = 100  # initial speed
         self.scan_delay = 0.5  # delay between scans
+
+        self.PID = PID(Kp=1.0, Ki=0.0, Kd=0.1)
 
     def start(self):
         """
@@ -47,6 +50,15 @@ class AutonomousVehicle:
         self.ultrasonic_sensor.join()
         self.servo_ctrl.join()
 
+    
+    def obstacle_ahead_maneuver(self,control_signal, left , right ):
+        turn_amount = 4 * control_signal
+        if left > right:
+            self.servo_ctrl.turnLeft(turn_amount)
+        else:
+            self.servo_ctrl.turnRight(turn_amount)
+    
+
     def autonomous_drive(self):
         """
         Main loop to perform autonomous driving with obstacle avoidance.
@@ -56,24 +68,18 @@ class AutonomousVehicle:
             left_distance, right_distance, top_distance, bottom_distance = self.scan_surroundings()
 
             print(f"Distances - Front: {front_distance}, Left: {left_distance}, Right: {right_distance}, Top: {top_distance}, Bottom: {bottom_distance}")
-
             if front_distance and front_distance < self.distance_threshold:
                 print("Obstacle detected in front!")
+                
+                coe = self.pid.update(front_distance) # PID control to determine the turn coefficient
                 self.robot_move.pause()
                 self.robot_light.setColor(255, 0, 0)  # Set lights to red to indicate obstacle
 
-                if left_distance and right_distance:
-                    if left_distance > right_distance:
-                        self.servo_ctrl.turnLeft()
-                        self.robot_move.move(self.speed, 'forward')
+                if left_distance > self.distance_threshold or right_distance > self.distance_threshold:
+                    if not right_distance or (left_distance and left_distance > right_distance):
+                        self.servo_ctrl.turnLeft(coe)
                     else:
-                        self.servo_ctrl.turnRight()
-                        self.robot_move.move(self.speed, 'forward')
-                elif left_distance:
-                    self.servo_ctrl.turnLeft()
-                    self.robot_move.move(self.speed, 'forward')
-                elif right_distance:
-                    self.servo_ctrl.turnRight()
+                        self.servo_ctrl.turnRight(coe)
                     self.robot_move.move(self.speed, 'forward')
                 else:
                     print("No clear path forward, moving backward.")
@@ -88,7 +94,7 @@ class AutonomousVehicle:
                 self.robot_move.move(self.speed, 'forward')
                 self.robot_light.setColor(0, 255, 0)  # Set lights to green to indicate clear path
 
-            time.sleep(self.scan_delay)
+                time.sleep(self.scan_delay)
 
     def scan_surroundings(self):
         """
