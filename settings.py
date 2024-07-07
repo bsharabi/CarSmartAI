@@ -55,3 +55,18 @@ SERVO_RANGE = 150
 SERVO_HEAD = 0
 SERVO_MID_HEAD = 1
 SERVO_WHEEL = 2
+
+
+# Settings for Robot Functions
+LINE_PIN_LEFT = 19
+LINE_PIN_MIDDLE = 16
+LINE_PIN_RIGHT = 20
+
+# Motor settings
+MOTOR_SPEED = 75
+
+# Servo settings
+ANGLE_RATE = 1
+
+# Line following color selection (0 for white line, 1 for black line)
+COLOR_SELECT = 1
