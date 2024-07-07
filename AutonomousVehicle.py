@@ -69,24 +69,24 @@ class AutonomousVehicle:
                 print(f"Distances - Front: {front_distance}, Left: {left_distance}, Right: {right_distance}, Top: {top_distance}, Bottom: {bottom_distance}")
                 
                 coe = self.PID.update(front_distance) # PID control to determine the turn coefficient
-                
+                print(f'coe is : {coe}')
                 self.robot_light.setColor(255, 0, 0)  # Set lights to red to indicate obstacle
 
-                if left_distance > self.distance_threshold or right_distance > self.distance_threshold:
+                if left_distance > self.distance_threshold * 0.75 or right_distance > self.distance_threshold * 0.75:
                     if not right_distance or (left_distance and left_distance > right_distance):
-                        self.servo_ctrl.turnLeft(coe)
+                        self.servo_ctrl.turnLeft(2 * coe)
                         time.sleep(0.5)
                         self.servo_ctrl.turnMiddle()
                     else:
-                        self.servo_ctrl.turnRight(coe)
+                        self.servo_ctrl.turnRight(2 * coe)
                         time.sleep(0.5)
                         self.servo_ctrl.turnMiddle()
                     self.robot_move.move(self.speed, 'forward')
                 else:
                     # Reduce speed to avoid collision when moving backward
                     print("No clear path forward, moving backward.")
-                    self.robot_move.move(self.speed // 2, 'backward')
-                    time.sleep(1)
+                    self.robot_move.move(self.speed // 2 , 'backward')
+                    time.sleep(3)
                     
 
             else:
@@ -102,25 +102,25 @@ class AutonomousVehicle:
 
         :return: Distances to the left, right, top, and bottom obstacles.
         """
-        self.servo_ctrl.lookLeft(45)
+        self.servo_ctrl.lookLeft(75)
         time.sleep(1)
         left_distance = self.ultrasonic_sensor.get_distance()
 
-        self.servo_ctrl.lookRight(45)
+        self.servo_ctrl.lookRight(75)
         time.sleep(0.5)
         right_distance = self.ultrasonic_sensor.get_distance()
 
-        self.servo_ctrl.lookUp(0)
-        time.sleep(0.5)
-        top_distance = self.ultrasonic_sensor.get_distance()
+        # self.servo_ctrl.lookUp(0)
+        # time.sleep(0.5)
+        # top_distance = self.ultrasonic_sensor.get_distance()
 
-        self.servo_ctrl.lookDown(45)
-        time.sleep(0.5)
-        bottom_distance = self.ultrasonic_sensor.get_distance()
+        # self.servo_ctrl.lookDown(45)
+        # time.sleep(0.5)
+        # bottom_distance = self.ultrasonic_sensor.get_distance()
 
         self.servo_ctrl.ahead()
 
-        return left_distance, right_distance, top_distance, bottom_distance
+        return left_distance, right_distance, 0 , 0 #top_distance, bottom_distance
 
 def main():
     av = AutonomousVehicle()
