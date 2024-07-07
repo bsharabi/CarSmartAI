@@ -57,14 +57,16 @@ class AutonomousVehicle:
         """
         while True:
             front_distance = self.ultrasonic_sensor.get_distance()
-            # little pause for surroundings scan
-            self.robot_move.pause()
-            left_distance, right_distance, top_distance, bottom_distance = self.scan_surroundings()
-
-            print(f"Distances - Front: {front_distance}, Left: {left_distance}, Right: {right_distance}, Top: {top_distance}, Bottom: {bottom_distance}")
+            
             if front_distance and front_distance < self.distance_threshold:
-                
-                print("Obstacle detected in front!")
+    
+                print("Obstacle detected in front! scanning for solution")
+
+                # little pause for surroundings scan
+                self.robot_move.pause()
+                left_distance, right_distance, top_distance, bottom_distance = self.scan_surroundings()
+
+                print(f"Distances - Front: {front_distance}, Left: {left_distance}, Right: {right_distance}, Top: {top_distance}, Bottom: {bottom_distance}")
                 
                 coe = self.PID.update(front_distance) # PID control to determine the turn coefficient
                 
