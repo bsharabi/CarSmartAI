@@ -87,8 +87,6 @@ class AutonomousVehicle:
                     print("No clear path forward, moving backward.")
                     self.robot_move.move(self.speed // 2, 'backward')
                     time.sleep(1)
-                    self.robot_move.pause()
-                    
                     
 
             else:
