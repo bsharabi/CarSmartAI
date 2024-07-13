@@ -177,7 +177,7 @@ display:flex;
 position:absolute;
 min-height:100%;
 width:100%;
-background:url(/api/img/bg.jpg) fixed top}.area-wrapper[data-v-087c7749]{margin:0 auto;
+/* background:url(/api/img/bg.jpg) fixed top}.area-wrapper[data-v-087c7749]{margin:0 auto; */
 min-height:100%;
 min-width:320px;
 width:85rem;
