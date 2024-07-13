@@ -19,37 +19,8 @@ pwm.set_pwm_freq(50)
 
 
 
-curpath = os.path.realpath(__file__)
-thisPath = "/" + os.path.dirname(curpath)
 
-def num_import_int(initial):        #Call this function to import data from '.txt' file
-	global r
-	with open(thisPath+"/RPIservo.py") as f:
-		for line in f.readlines():
-			if(line.find(initial) == 0):
-				r=line
-	begin=len(list(initial))
-	snum=r[begin:]
-	n=int(snum)
-	return n
 
-pwm0_direction = 1
-pwm0_init = num_import_int('init_pwm0 = ')
-pwm0_max  = 520
-pwm0_min  = 100
-pwm0_pos  = pwm0_init
-
-pwm1_direction = 1
-pwm1_init = num_import_int('init_pwm1 = ')
-pwm1_max  = 520
-pwm1_min  = 100
-pwm1_pos  = pwm1_init
-
-pwm2_direction = 1
-pwm2_init = num_import_int('init_pwm2 = ')
-pwm2_max  = 520
-pwm2_min  = 100
-pwm2_pos  = pwm2_init
 
 line_pin_right = 20
 line_pin_middle = 16
@@ -89,38 +60,7 @@ class Functions(threading.Thread):
 		self.__flag.clear()
 
 	def radarScan(self):
-		global pwm0_pos
-		scan_speed = 3
-		result = []
-
-		if pwm0_direction:
-			pwm0_pos = pwm0_max
-			pwm.set_pwm(1, 0, pwm0_pos)
-			time.sleep(0.8)
-
-			while pwm0_pos>pwm0_min:
-				pwm0_pos-=scan_speed
-				pwm.set_pwm(1, 0, pwm0_pos)
-				dist = UltrasonicSensor.checkdist()
-				if dist > 20:
-					continue
-				theta = 180 - (pwm0_pos-100)/2.55 # +30 deviation
-				result.append([dist, theta])
-		else:
-			pwm0_pos = pwm0_min
-			pwm.set_pwm(1, 0, pwm0_pos)
-			time.sleep(0.8)
-
-			while pwm0_pos<pwm0_max:
-				pwm0_pos+=scan_speed
-				pwm.set_pwm(1, 0, pwm0_pos)
-				dist = UltrasonicSensor.checkdist()
-				if dist > 20:
-					continue
-				theta = (pwm0_pos-100)/2.55
-				result.append([dist, theta])
-		pwm.set_pwm(1, 0, pwm0_init)
-		return result
+		return sc.radar_scan()
 
 
 	def pause(self):
@@ -187,15 +127,15 @@ class Functions(threading.Thread):
 
 		sc.moveAngle(2, 0)
 		if self.scanPos == 1:
-			pwm.set_pwm(self.scanServo, 0, pwm1_init+self.scanRange)
+			pwm.set_pwm(self.scanServo, 0, sc.initPos[1]+self.scanRange)
 			time.sleep(0.3)
 			self.scanList[0] = UltrasonicSensor.checkdist()
 		elif self.scanPos == 2:
-			pwm.set_pwm(self.scanServo, 0, pwm1_init)
+			pwm.set_pwm(self.scanServo, 0, sc.initPos[1])
 			time.sleep(0.3)
 			self.scanList[1] = UltrasonicSensor.checkdist()
 		elif self.scanPos == 3:
-			pwm.set_pwm(self.scanServo, 0, pwm1_init-self.scanRange)
+			pwm.set_pwm(self.scanServo, 0, sc.initPos[1]-self.scanRange)
 			time.sleep(0.3)
 			self.scanList[2] = UltrasonicSensor.checkdist()
 
