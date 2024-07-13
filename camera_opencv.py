@@ -181,7 +181,7 @@ class CVThread(threading.Thread):
             self.motionCounter += 1
             print(self.motionCounter)
             self.lastMovtionCaptured = timestamp
-            led.setColor(255,78,0)
+            led.breath(255,78,0)
             led.both_off()
             led.red()
             # switch.switch(1,1)
@@ -189,7 +189,7 @@ class CVThread(threading.Thread):
             # switch.switch(3,1)
 
         if (timestamp - self.lastMovtionCaptured).seconds >= 0.5:
-            led.setColor(0,78,255)
+            led.breath(0,78,255)
             led.both_off()
             led.blue()
             self.drawing = 0
@@ -318,12 +318,12 @@ class CVThread(threading.Thread):
             CVThread.servoMove(CVThread.T_servo, CVThread.T_direction, -error_Y)
 
             if CVThread.X_lock == 1 and CVThread.Y_lock == 1:
-                led.setColor(255,78,0)
+                led.breath(255,78,0)
                 led.both_off()
                 led.red()
                 print('locked')
             else:
-                led.setColor(0,78,255)
+                led.breath(0,78,255)
                 led.both_off()
                 led.blue()
                 print('unlocked')
