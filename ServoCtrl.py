@@ -40,7 +40,7 @@ class ServoCtrl(threading.Thread):
             self.scSpeed = [0] * 3
             self.sc_direction = [1] * 3
 
-            self.ctrlRangeMax = 560
+            self.ctrlRangeMax = 500
             self.ctrlRangeMin = 100
             self.angleRange = 180
 
@@ -564,7 +564,6 @@ def main():
         time.sleep(6)
         sc.singleServo(settings.SERVO_HEAD, -1, 30)
         time.sleep(1)
-        print(sc.radar_scan())
         sc.turnLeft()
         time.sleep(2)
         sc.turnRight()
