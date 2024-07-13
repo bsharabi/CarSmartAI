@@ -173,10 +173,10 @@ def robotCtrl(command_input, response):
 		robot_move.motor_stop()
 		if turn_command == 'left':
 			RL.both_off()
-			RL.turnLeft()
+			RL.turn_left()
 		elif turn_command == 'right':
 			RL.both_off()
-			RL.turnRight()
+			RL.turn_right()
 		elif turn_command == 'no':
 			RL.both_off()
 
@@ -185,13 +185,13 @@ def robotCtrl(command_input, response):
 		turn_command = 'left'
 		sc.moveAngle(2, 30)
 		RL.both_off()
-		RL.turnLeft()
+		RL.turn_left()
 
 	elif 'right' == command_input:
 		turn_command = 'right'
 		sc.moveAngle(2,-30)
 		RL.both_off()
-		RL.turnRight()
+		RL.turn_right()
 
 	elif 'TS' in command_input:
 		turn_command = 'no'
