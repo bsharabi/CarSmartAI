@@ -28,9 +28,9 @@ def video_feed():
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-@app.route('/api/img/<path:filename>')
-def sendimg(filename):
-    return send_from_directory(dir_path+'/dist/img', filename)
+# @app.route('/api/img/<path:filename>')
+# def sendimg(filename):
+#     return send_from_directory(dir_path+'/dist/img', filename)
 
 @app.route('/js/<path:filename>')
 def sendjs(filename):
@@ -40,9 +40,9 @@ def sendjs(filename):
 def sendcss(filename):
     return send_from_directory(dir_path+'/dist/css', filename)
 
-@app.route('/api/img/icon/<path:filename>')
-def sendicon(filename):
-    return send_from_directory(dir_path+'/dist/img/icon', filename)
+# @app.route('/api/img/icon/<path:filename>')
+# def sendicon(filename):
+#     return send_from_directory(dir_path+'/dist/img/icon', filename)
 
 @app.route('/fonts/<path:filename>')
 def sendfonts(filename):
