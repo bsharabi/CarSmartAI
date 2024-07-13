@@ -1,21 +1,21 @@
 import os
 import cv2
 from base_camera import BaseCamera
-import RPIservo
+from ServoCtrl import ServoCtrl
+from RobotMove import RobotMove
+from ServoCtrl import ServoCtrl
 import numpy as np
-import move
-import switch
 import datetime
 import Kalman_filter
-import PID2
+import PID
 import time
 import threading
-import imutils
-import robotLight
-import RPIservo
+import imutils # type: ignore
+from RobotLight import RobotLight
 
-led = robotLight.RobotLight()
-pid = PID2.PID()
+robot_move=RobotMove()
+led = RobotLight()
+pid = PID.PID()
 pid.SetKp(0.5)
 pid.SetKd(0)
 pid.SetKi(0)
@@ -51,10 +51,10 @@ class CVThread(threading.Thread):
     X_lock = 0
     tor = 27
 
-    scGear = RPIservo.ServoCtrl()
+    scGear = ServoCtrl()
     scGear.moveInit()
-    move.setup()
-    switch.switchSetup()
+    robot_move=RobotMove()
+
 
     def __init__(self, *args, **kwargs):
         self.CVThreading = 0
@@ -209,10 +209,10 @@ class CVThread(threading.Thread):
                 outv = int(round((pid.GenOut(error)),0))
                 CVThread.scGear.moveAngle(2,-outv)
                 if CVRun:
-                    move.motor_left(1, 0, 80)
-                    move.motor_right(1, 0, 80)
+                    robot_move.move(80,'forward')
+                    
                 else:
-                    move.motorStop()
+                   robot_move.motorStop()
                 pass
             elif posInput < (setCenter - findLineError):
                 # move.motorStop()
@@ -221,17 +221,18 @@ class CVThread(threading.Thread):
                 outv = int(round((pid.GenOut(error)),0))
                 CVThread.scGear.moveAngle(2,outv)
                 if CVRun:
-                    move.motor_left(1, 0, 80)
-                    move.motor_right(1, 0, 80)
+                    
+                    robot_move.move(80,'forward')
+                    
                 else:
-                    move.motorStop()
+                    robot_move.motorStop()
                 pass
             else:
                 if CVRun:
-                    move.motor_left(1, 0, 80)
-                    move.motor_right(1, 0, 80)
+                    robot_move.move(80,'forward')
+                    
                 else:
-                    move.motorStop()
+                    robot_move.motorStop()
                 #forward
                 pass
         else:
@@ -329,7 +330,7 @@ class CVThread(threading.Thread):
                 print('unlocked')
         else:
             self.findColorDetection = 0
-            move.motorStop()
+            robot_move.motorStop()
         self.pause()
 
 
@@ -457,7 +458,7 @@ class Camera(BaseCamera):
                 continue
 
             if Camera.modeSelect == 'none':
-                switch.switch(1,0)
+                led.switch(1,0)
                 cvt.pause()
             else:
                 if cvt.CVThreading:
