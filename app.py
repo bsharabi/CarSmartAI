@@ -1,15 +1,13 @@
-#!/usr/bin/env python
+
 from importlib import import_module
 import os
 from flask import Flask, render_template, Response, send_from_directory
 from flask_cors import *
-# import camera driver
+
 
 from camera_opencv import Camera
 import threading
 
-# Raspberry Pi camera module (requires picamera package)
-# from camera_pi import Camera
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
