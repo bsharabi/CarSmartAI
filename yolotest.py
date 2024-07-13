@@ -7,14 +7,19 @@ cap = cv2.VideoCapture(0)
 cap.set(3, 640)
 cap.set(4, 480)
 
+# Provide absolute paths to the model files
+weights_path = "yolov3.weights"
+config_path = "yolov3.cfg"
+names_path = "coco.names"
+
 # Load YOLO model
-net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
+net = cv2.dnn.readNet(weights_path, config_path)
 layer_names = net.getLayerNames()
 output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
-# Object classes
+# Load object classes
 classNames = []
-with open("coco.names", "r") as f:
+with open(names_path, "r") as f:
     classNames = [line.strip() for line in f.readlines()]
 
 # Known width of the object (in meters)
