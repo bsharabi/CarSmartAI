@@ -166,7 +166,7 @@ class CVThread(threading.Thread):
         self.cnts = cv2.findContours(self.thresh.copy(), cv2.RETR_EXTERNAL,
             cv2.CHAIN_APPROX_SIMPLE)
         self.cnts = imutils.grab_contours(self.cnts)
-        # print('x')
+        print('x')
         # loop over the contours
         for c in self.cnts:
             # if the contour is too small, ignore it
@@ -179,8 +179,7 @@ class CVThread(threading.Thread):
             self.drawing = 1
             
             self.motionCounter += 1
-            #print(motionCounter)
-            #print(text)
+            print(self.motionCounter)
             self.lastMovtionCaptured = timestamp
             led.setColor(255,78,0)
             led.both_off()
@@ -363,16 +362,11 @@ class CVThread(threading.Thread):
 class Camera(BaseCamera):
     video_source = -1
     modeSelect = 'none'
-    # modeSelect = 'findlineCV'
-    # modeSelect = 'findColor'
-    # modeSelect = 'watchDog'
-
 
     def __init__(self):
         if os.environ.get('OPENCV_CAMERA_SOURCE'):
             Camera.set_video_source(int(os.environ['OPENCV_CAMERA_SOURCE']))
         super(Camera, self).__init__()
-
 
     def colorFindSet(self, invarH, invarS, invarV):
         global colorUpper, colorLower
