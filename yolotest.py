@@ -15,7 +15,7 @@ names_path = "coco.names"
 # Load YOLO model
 net = cv2.dnn.readNet(weights_path, config_path)
 layer_names = net.getLayerNames()
-output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
 
 # Load object classes
 classNames = []
