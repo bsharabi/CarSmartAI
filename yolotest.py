@@ -7,7 +7,7 @@ cap = cv2.VideoCapture(0)
 cap.set(3, 640)
 cap.set(4, 480)
 
-# Provide absolute paths to the model files
+# Provide paths to the model files
 weights_path = "yolov3.weights"
 config_path = "yolov3.cfg"
 names_path = "coco.names"
@@ -15,21 +15,21 @@ names_path = "coco.names"
 # Load YOLO model
 net = cv2.dnn.readNet(weights_path, config_path)
 layer_names = net.getLayerNames()
-output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
 
 # Load object classes
 classNames = []
 with open(names_path, "r") as f:
     classNames = [line.strip() for line in f.readlines()]
 
-# Known width of the object (in meters)
+# Function to calculate distance from the camera to the object
 KNOWN_WIDTH = 0.0856  # Example width, use your own known object's width
-# Focal length in pixels (calibrate your camera to find this value)
 FOCAL_LENGTH = 700  # Example value, replace with your calculated focal length
 
 def calculate_distance(known_width, focal_length, width_in_pixels):
     return (known_width * focal_length) / width_in_pixels
 
+# Movement functions
 def move_forward():
     print("Moving forward")
 
@@ -47,6 +47,9 @@ def stop():
 
 while True:
     success, img = cap.read()
+    if not success:
+        break
+
     height, width, channels = img.shape
 
     # Prepare the image for the model
@@ -89,14 +92,16 @@ while True:
             label = str(classNames[class_id])
             confidence = confidences[i]
 
-            # Calculate the distance to the object
-            distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, w)
-            distances.append((distance, x, y, x + w, y + h))
+            # Check if the detected object is a cup
+            if label == "cup":
+                # Calculate the distance to the object
+                distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, w)
+                distances.append((distance, x, y, x + w, y + h))
 
-            # Draw the bounding box and label
-            color = (255, 0, 0)
-            cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
-            cv2.putText(img, f"{label} {confidence:.2f} {distance:.2f}m", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                # Draw the bounding box and label
+                color = (255, 0, 0)
+                cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+                cv2.putText(img, f"{label} {confidence:.2f} {distance:.2f}m", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
     # Obstacle avoidance logic
     if distances:
@@ -117,6 +122,7 @@ while True:
     else:
         move_forward()
 
+    # Display the image using OpenCV
     cv2.imshow('Webcam', img)
     if cv2.waitKey(1) == ord('q'):
         break
