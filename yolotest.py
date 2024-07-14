@@ -8,9 +8,9 @@ cap.set(3, 640)
 cap.set(4, 480)
 
 # Provide paths to the model files
-weights_path = "yolov3.weights"
-config_path = "yolov3.cfg"
-names_path = "coco.names"
+weights_path = "yolo-Weights/yolov3-tiny.weights"  # Use a smaller model like yolov3-tiny
+config_path = "yolo-Weights/yolov3-tiny.cfg"
+names_path = "yolo-Weights/coco.names"
 
 # Load YOLO model
 net = cv2.dnn.readNet(weights_path, config_path)
@@ -45,6 +45,9 @@ def move_right():
 def stop():
     print("Stopping")
 
+frame_count = 0  # Initialize frame counter
+process_frame_interval = 5  # Process every nth frame to reduce load
+
 while True:
     success, img = cap.read()
     if not success:
@@ -52,75 +55,77 @@ while True:
 
     height, width, channels = img.shape
 
-    # Prepare the image for the model
-    blob = cv2.dnn.blobFromImage(img, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
-    net.setInput(blob)
-    outs = net.forward(output_layers)
+    frame_count += 1
+    if frame_count % process_frame_interval == 0:
+        # Prepare the image for the model
+        blob = cv2.dnn.blobFromImage(img, 0.00392, (320, 320), (0, 0, 0), True, crop=False)  # Reduced input size
+        net.setInput(blob)
+        outs = net.forward(output_layers)
 
-    # Coordinates and obstacle detection
-    class_ids = []
-    confidences = []
-    boxes = []
+        # Coordinates and obstacle detection
+        class_ids = []
+        confidences = []
+        boxes = []
 
-    for out in outs:
-        for detection in out:
-            scores = detection[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
-            if confidence > 0.5:
-                # Object detected
-                center_x = int(detection[0] * width)
-                center_y = int(detection[1] * height)
-                w = int(detection[2] * width)
-                h = int(detection[3] * height)
+        for out in outs:
+            for detection in out:
+                scores = detection[5:]
+                class_id = np.argmax(scores)
+                confidence = scores[class_id]
+                if confidence > 0.5:  # Adjust confidence threshold if needed
+                    # Object detected
+                    center_x = int(detection[0] * width)
+                    center_y = int(detection[1] * height)
+                    w = int(detection[2] * width)
+                    h = int(detection[3] * height)
 
-                # Rectangle coordinates
-                x = int(center_x - w / 2)
-                y = int(center_y - h / 2)
+                    # Rectangle coordinates
+                    x = int(center_x - w / 2)
+                    y = int(center_y - h / 2)
 
-                boxes.append([x, y, w, h])
-                confidences.append(float(confidence))
-                class_ids.append(class_id)
+                    boxes.append([x, y, w, h])
+                    confidences.append(float(confidence))
+                    class_ids.append(class_id)
 
-    indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-    distances = []
+        indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+        distances = []
 
-    for i in range(len(boxes)):
-        if i in indexes:
-            x, y, w, h = boxes[i]
-            class_id = class_ids[i]
-            label = str(classNames[class_id])
-            confidence = confidences[i]
+        for i in range(len(boxes)):
+            if i in indexes:
+                x, y, w, h = boxes[i]
+                class_id = class_ids[i]
+                label = str(classNames[class_id])
+                confidence = confidences[i]
 
-            # Check if the detected object is a cup
-            if label == "cup":
-                # Calculate the distance to the object
-                distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, w)
-                distances.append((distance, x, y, x + w, y + h))
+                # Check if the detected object is a cup
+                if True:
+                    # Calculate the distance to the object
+                    distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, w)
+                    distances.append((distance, x, y, x + w, y + h))
 
-                # Draw the bounding box and label
-                color = (255, 0, 0)
-                cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
-                cv2.putText(img, f"{label} {confidence:.2f} {distance:.2f}m", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    # Draw the bounding box and label
+                    color = (255, 0, 0)
+                    cv2.rectangle(img, (x, y), (x + w, y + h), color, 2)
+                    cv2.putText(img, f"{label} {confidence:.2f} {distance:.2f}m", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-    # Obstacle avoidance logic
-    if distances:
-        closest_object = min(distances, key=lambda x: x[0])  # Find the closest object
-        distance, x1, y1, x2, y2 = closest_object
+        # Obstacle avoidance logic
+        if distances:
+            closest_object = min(distances, key=lambda x: x[0])  # Find the closest object
+            distance, x1, y1, x2, y2 = closest_object
 
-        if distance < 0.2:  # Example threshold distance in meters
-            center_x = (x1 + x2) // 2
+            if distance < 0.2:  # Example threshold distance in meters
+                center_x = (x1 + x2) // 2
 
-            if center_x < img.shape[1] // 3:
-                move_right()
-            elif center_x > 2 * img.shape[1] // 3:
-                move_left()
+                if center_x < img.shape[1] // 3:
+                    move_right()
+                elif center_x > 2 * img.shape[1] // 3:
+                    move_left()
+                else:
+                    move_backward()
             else:
-                move_backward()
+                move_forward()
         else:
             move_forward()
-    else:
-        move_forward()
 
     # Display the image using OpenCV
     cv2.imshow('Webcam', img)
