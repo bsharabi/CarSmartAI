@@ -8,8 +8,7 @@ UPPER_RED_1 = np.array([10, 255, 255])
 LOWER_RED_2 = np.array([170, 120, 70])
 UPPER_RED_2 = np.array([180, 255, 255])
 
-# Initialize camera
-cap = cv2.VideoCapture(0)
+
 
 def detect_cones(frame):
     """
@@ -75,33 +74,6 @@ def get_direction(cone_centers, frame_width):
     else:
         return 'forward'
 
-def main():
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        frame_height, frame_width = frame.shape[:2]
-        contours = detect_cones(frame)
-        cone_centers = [get_center(contour) for contour in contours if get_center(contour)]
-
-        # Draw detected cones
-        for center in cone_centers:
-            cv2.circle(frame, center, 5, (0, 255, 0), -1)
-
-        direction = get_direction(cone_centers, frame_width)
-        print("Direction:", direction)
-        drive(direction)  # Call the drive function to move the robot
-
-        # Show the frame
-        cv2.imshow("Frame", frame)
-
-        # Exit on 'q' key
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
 
 def drive(direction):
     """
