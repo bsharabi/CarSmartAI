@@ -16,6 +16,8 @@ This repository contains the code for an autonomous robot vehicle designed to fo
   - [Classes and Methods](#classes-and-methods)
     - [`Functions` Class](#functions-class)
   - [Settings Configuration](#settings-configuration)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Introduction
 The autonomous robot vehicle is designed to demonstrate the capabilities of modern robotics in terms of navigation and obstacle avoidance. It utilizes a combination of motor control, servo control, ultrasonic sensors, and LED indicators to move around its environment, detect and avoid obstacles, and follow predefined lines.
@@ -117,6 +119,11 @@ The `Functions` class in `functions.py` contains various methods to control the 
 - `functionGoing(self)`: Determines which function to execute based on the current mode.
 - `run(self)`: Main loop that continuously checks and executes the current function.
 
-
 ## Settings Configuration
 The `settings.py` file contains various configuration options for the robot, including motor settings, servo settings, and line-following parameters. Adjust these settings according to your hardware setup and preferences.
+
+## Contributing
+Please fork this repository and submit pull requests for any improvements or bug fixes.
+
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.
