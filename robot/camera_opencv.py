@@ -10,7 +10,7 @@ import robot.Kalman_filter as Kalman_filter
 import robot.PID as PID
 import threading
 import imutils 
-from .deteect import *
+from .deteect import detect_cones,get_center,get_direction,drive
 
 
 # Function to calculate distance from the camera to the object
