@@ -226,7 +226,7 @@ class Functions(threading.Thread):
 
 	def steadyProcessing(self):
 		print('steadyProcessing')
-		xGet = sensor.get_accel_data()
+		xGet = sensor.get_accel_data() # type: ignore
 		xGet = xGet['x']
 		xOut = kalman_filter_X.kalman(xGet)
 		pwm.set_pwm(2, 0, self.steadyGoal+pwmGenOut(xOut*9))
