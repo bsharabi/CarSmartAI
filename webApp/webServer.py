@@ -69,7 +69,7 @@ def functionSelect(command_input, response):
         response (dict): The response dictionary to be updated.
     """
     global functionMode
-    print(command_input,response)
+    print(command_input,response,modeSelect)
     if 'scan' == command_input:
         if modeSelect == 'PT':
             radar_send = sc.radarScan()
