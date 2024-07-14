@@ -9,7 +9,6 @@ LOWER_RED_2 = np.array([170, 120, 70])
 UPPER_RED_2 = np.array([180, 255, 255])
 
 
-
 def detect_cones(frame):
     """
     Detect cones in the given frame.
@@ -30,7 +29,13 @@ def detect_cones(frame):
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
 
-    contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # Handle different OpenCV versions
+    contours = None
+    try:
+        contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    except ValueError:
+        _, contours, _ = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
     return contours
 
 def get_center(contour):
