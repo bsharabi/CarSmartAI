@@ -141,6 +141,10 @@ class CVThread(threading.Thread):
         elif self.CVMode == 'watchDog':
             if self.drawing:
                 cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
+       
+        elif self.CVMode == 'automatic':
+            if self.drawing:
+                cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
 
         return imgInput
 
@@ -178,7 +182,7 @@ class CVThread(threading.Thread):
             self.drawing = 1
             
             self.motionCounter += 1
-            print(self.motionCounter)
+            # print(self.motionCounter)
             self.lastMovtionCaptured = timestamp
             led.breath(255,78,0)
             led.both_off()
@@ -230,7 +234,7 @@ class CVThread(threading.Thread):
             self.drawing = 1
             
             self.motionCounter += 1
-            print(self.motionCounter)
+            # print(self.motionCounter)
             self.lastMovtionCaptured = timestamp
             led.breath(255,78,0)
             led.both_off()
