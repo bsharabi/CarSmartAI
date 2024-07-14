@@ -202,21 +202,21 @@ class CVThread(threading.Thread):
        
         self.pause()
            
-    # def automatic(self, frame):
+    def automatic(self, frame):
        
 
-    #     frame_height, frame_width = frame.shape[:2]
-    #     contours = detect_cones(frame)
-    #     cone_centers = [get_center(contour) for contour in contours if get_center(contour)]
+        frame_height, frame_width = frame.shape[:2]
+        contours = detect_cones(frame)
+        cone_centers = [get_center(contour) for contour in contours if get_center(contour)]
 
-    #     # Draw detected cones
-    #     for center in cone_centers:
-    #         cv2.circle(frame, center, 5, (0, 255, 0), -1)
+        # Draw detected cones
+        for center in cone_centers:
+            cv2.circle(frame, center, 5, (0, 255, 0), -1)
 
-    #     direction = get_direction(cone_centers, frame_width)
-    #     print("Direction:", direction)
-    #     drive(direction)  # Call the drive function to move the robot
-    #     pass
+        direction = get_direction(cone_centers, frame_width)
+        print("Direction:", direction)
+        drive(direction)  # Call the drive function to move the robot
+        pass
 
 
     def findLineCtrl(self, posInput, setCenter):#2
