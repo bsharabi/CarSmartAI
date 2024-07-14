@@ -158,6 +158,13 @@ class CVThread(threading.Thread):
             if self.drawing:
                 cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h),
                               (128, 255, 0), 1)
+            for i in range(len(self.boxes)):
+                if i in self.indexes:
+                    x, y, w, h = self.boxes[i]
+                    label = str(classes[self.class_ids[i]])
+                    color = (0, 255, 0)
+                    cv2.rectangle(imgInput, (x, y), (x + w, y + h), color, 2)
+                    cv2.putText(imgInput, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         return imgInput
 
     def watchDog(self, imgInput):
@@ -199,9 +206,9 @@ class CVThread(threading.Thread):
             net.setInput(blob)
             outs = net.forward(output_layers)
 
-            class_ids = []
+            self.class_ids = []
             confidences = []
-            boxes = []
+            self.boxes = []
 
             for out in outs:
                 for detection in out:
@@ -219,19 +226,11 @@ class CVThread(threading.Thread):
                         x = int(center_x - w / 2)
                         y = int(center_y - h / 2)
 
-                        boxes.append([x, y, w, h])
+                        self.boxes.append([x, y, w, h])
                         confidences.append(float(confidence))
-                        class_ids.append(class_id)
+                        self.class_ids.append(class_id)
 
-            indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
-
-            for i in range(len(boxes)):
-                if i in indexes:
-                    x, y, w, h = boxes[i]
-                    label = str(classes[class_ids[i]])
-                    color = (0, 255, 0)
-                    cv2.rectangle(imgInput, (x, y), (x + w, y + h), color, 2)
-                    cv2.putText(imgInput, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            self.indexes = cv2.dnn.NMSBoxes(self.boxes, confidences, 0.5, 0.4)
 
         if (timestamp - self.lastMovtionCaptured).seconds >= 0.5:
             led.breath(0, 78, 255)
