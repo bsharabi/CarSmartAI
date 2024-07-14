@@ -10,9 +10,7 @@ import robot.Kalman_filter as Kalman_filter
 import robot.PID as PID
 import threading
 import imutils 
-# Function to calculate distance from the camera to the object
-KNOWN_WIDTH = 0.0856  # Example width, use your own known object's width
-FOCAL_LENGTH = 700  # Example value, replace with your calculated focal length
+
 
 robot_move = RobotMove()
 led = RobotLight()
@@ -33,18 +31,6 @@ ImgIsNone = 0
 colorUpper = np.array([44, 255, 255])
 colorLower = np.array([24, 100, 100])
 
-# Paths to YOLO files
-YOLO_PATH = "robot"  # Replace with the actual path
-YOLO_WEIGHTS = os.path.join(YOLO_PATH, "yolov3.weights")
-YOLO_CFG = os.path.join(YOLO_PATH, "yolov3.cfg")
-YOLO_NAMES = os.path.join(YOLO_PATH, "coco.names")
-
-# Load YOLO
-net = cv2.dnn.readNet(YOLO_WEIGHTS, YOLO_CFG)
-layer_names = net.getLayerNames()
-output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-with open(YOLO_NAMES, "r") as f:
-    classes = [line.strip() for line in f.readlines()]
     
 class CVThread(threading.Thread):
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -113,61 +99,54 @@ class CVThread(threading.Thread):
         self.imgCV = imgInput
         self.resume()
 
-    def elementDraw(self, imgInput):
+    def elementDraw(self,imgInput):
         if self.CVMode == 'none':
             pass
+
         elif self.CVMode == 'findColor':
             if self.findColorDetection:
-                cv2.putText(imgInput, 'Target Detected', (40, 60), CVThread.font, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+                cv2.putText(imgInput,'Target Detected',(40,60), CVThread.font, 0.5,(255,255,255),1,cv2.LINE_AA)
                 self.drawing = 1
             else:
-                cv2.putText(imgInput, 'Target Detecting', (40, 60), CVThread.font, 0.5, (255, 255, 255), 1, cv2.LINE_AA)
+                cv2.putText(imgInput,'Target Detecting',(40,60), CVThread.font, 0.5,(255,255,255),1,cv2.LINE_AA)
                 self.drawing = 0
+
             if self.radius > 10 and self.drawing:
-                cv2.rectangle(imgInput, (int(self.box_x - self.radius), int(self.box_y + self.radius)),
-                              (int(self.box_x + self.radius), int(self.box_y - self.radius)), (255, 255, 255), 1)
+                cv2.rectangle(imgInput,(int(self.box_x-self.radius),int(self.box_y+self.radius)),(int(self.box_x+self.radius),int(self.box_y-self.radius)),(255,255,255),1)
+
         elif self.CVMode == 'findlineCV':
             if frameRender:
                 imgInput = cv2.cvtColor(imgInput, cv2.COLOR_BGR2GRAY)
-                retval_bw, imgInput = cv2.threshold(imgInput, 0, 255, cv2.THRESH_OTSU)
+                retval_bw, imgInput =  cv2.threshold(imgInput, 0, 255, cv2.THRESH_OTSU)
                 imgInput = cv2.erode(imgInput, None, iterations=6)
             try:
                 if lineColorSet == 255:
-                    cv2.putText(imgInput, ('Following White Line'), (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                                (128, 255, 128), 1, cv2.LINE_AA)
+                    cv2.putText(imgInput,('Following White Line'),(30,50), cv2.FONT_HERSHEY_SIMPLEX, 0.5,(128,255,128),1,cv2.LINE_AA)
                 else:
-                    cv2.putText(imgInput, ('Following Black Line'), (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
-                                (128, 255, 128), 1, cv2.LINE_AA)
-                cv2.line(imgInput, (self.left_Pos1, (linePos_1 + 30)), (self.left_Pos1, (linePos_1 - 30)),
-                         (255, 128, 64), 1)
-                cv2.line(imgInput, (self.right_Pos1, (linePos_1 + 30)), (self.right_Pos1, (linePos_1 - 30)),
-                         (64, 128, 255), )
-                cv2.line(imgInput, (0, linePos_1), (640, linePos_1), (255, 255, 64), 1)
-                cv2.line(imgInput, (self.left_Pos2, (linePos_2 + 30)), (self.left_Pos2, (linePos_2 - 30)),
-                         (255, 128, 64), 1)
-                cv2.line(imgInput, (self.right_Pos2, (linePos_2 + 30)), (self.right_Pos2, (linePos_2 - 30)),
-                         (64, 128, 255), 1)
-                cv2.line(imgInput, (0, linePos_2), (640, linePos_2), (255, 255, 64), 1)
-                cv2.line(imgInput, ((self.center - 20), int((linePos_1 + linePos_2) / 2)),
-                         ((self.center + 20), int((linePos_1 + linePos_2) / 2)), (0, 0, 0), 1)
-                cv2.line(imgInput, ((self.center), int((linePos_1 + linePos_2) / 2 + 20)),
-                         ((self.center), int((linePos_1 + linePos_2) / 2 - 20)), (0, 0, 0), 1)
+                    cv2.putText(imgInput,('Following Black Line'),(30,50), cv2.FONT_HERSHEY_SIMPLEX, 0.5,(128,255,128),1,cv2.LINE_AA)
+
+                cv2.line(imgInput,(self.left_Pos1,(linePos_1+30)),(self.left_Pos1,(linePos_1-30)),(255,128,64),1)
+                cv2.line(imgInput,(self.right_Pos1,(linePos_1+30)),(self.right_Pos1,(linePos_1-30)),(64,128,255),)
+                cv2.line(imgInput,(0,linePos_1),(640,linePos_1),(255,255,64),1)
+
+                cv2.line(imgInput,(self.left_Pos2,(linePos_2+30)),(self.left_Pos2,(linePos_2-30)),(255,128,64),1)
+                cv2.line(imgInput,(self.right_Pos2,(linePos_2+30)),(self.right_Pos2,(linePos_2-30)),(64,128,255),1)
+                cv2.line(imgInput,(0,linePos_2),(640,linePos_2),(255,255,64),1)
+
+                cv2.line(imgInput,((self.center-20),int((linePos_1+linePos_2)/2)),((self.center+20),int((linePos_1+linePos_2)/2)),(0,0,0),1)
+                cv2.line(imgInput,((self.center),int((linePos_1+linePos_2)/2+20)),((self.center),int((linePos_1+linePos_2)/2-20)),(0,0,0),1)
             except:
                 pass
+
         elif self.CVMode == 'watchDog':
             if self.drawing:
-                # cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h),
-                #               (128, 255, 0), 1)
-                for i in range(len(self.boxes)):
-                    if i in self.indexes:
-                        x, y, w, h = self.boxes[i]
-                        label = str(classes[self.class_ids[i]])
-                        color = (0, 255, 0)
-                        cv2.rectangle(imgInput, (x, y), (x + w, y + h), color, 2)
-                        cv2.putText(imgInput, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
+       
+
         return imgInput
 
-    def watchDog(self, imgInput):
+
+    def watchDog(self, imgInput:cv2.typing.MatLike):
         timestamp = datetime.datetime.now()
         gray = cv2.cvtColor(imgInput, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -180,64 +159,39 @@ class CVThread(threading.Thread):
         cv2.accumulateWeighted(gray, self.avg, 0.5)
         self.frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg))
 
-        # Threshold the delta image, dilate the thresholded image to fill
+        # threshold the delta image, dilate the thresholded image to fill
         # in holes, then find contours on thresholded image
-        self.thresh = cv2.threshold(self.frameDelta, 5, 255, cv2.THRESH_BINARY)[1]
+        self.thresh = cv2.threshold(self.frameDelta, 5, 255,
+            cv2.THRESH_BINARY)[1]
         self.thresh = cv2.dilate(self.thresh, None, iterations=2)
-        self.cnts = cv2.findContours(self.thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        self.cnts = cv2.findContours(self.thresh.copy(), cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE)
         self.cnts = imutils.grab_contours(self.cnts)
-
         # loop over the contours
         for c in self.cnts:
             # if the contour is too small, ignore it
             if cv2.contourArea(c) < 5000:
                 continue
-
+     
             # compute the bounding box for the contour, draw it on the frame,
             # and update the text
             (self.mov_x, self.mov_y, self.mov_w, self.mov_h) = cv2.boundingRect(c)
             self.drawing = 1
+            
             self.motionCounter += 1
+         
             self.lastMovtionCaptured = timestamp
-
-            # New object detection logic
-            height, width, channels = imgInput.shape
-            blob = cv2.dnn.blobFromImage(imgInput, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
-            net.setInput(blob)
-            outs = net.forward(output_layers)
-
-            self.class_ids = []
-            confidences = []
-            self.boxes = []
-
-            for out in outs:
-                for detection in out:
-                    scores = detection[5:]
-                    class_id = np.argmax(scores)
-                    confidence = scores[class_id]
-                    if confidence > 0.5:
-                        # Object detected
-                        center_x = int(detection[0] * width)
-                        center_y = int(detection[1] * height)
-                        w = int(detection[2] * width)
-                        h = int(detection[3] * height)
-
-                        # Rectangle coordinates
-                        x = int(center_x - w / 2)
-                        y = int(center_y - h / 2)
-
-                        self.boxes.append([x, y, w, h])
-                        confidences.append(float(confidence))
-                        self.class_ids.append(class_id)
-
-            self.indexes = cv2.dnn.NMSBoxes(self.boxes, confidences, 0.5, 0.4)
+            led.breath(255,78,0)
+            led.both_off()
+            led.red()
+      
 
         if (timestamp - self.lastMovtionCaptured).seconds >= 0.5:
-            led.breath(0, 78, 255)
+            led.breath(0,78,255)
             led.both_off()
             led.blue()
             self.drawing = 0
-
+       
         self.pause()
            
     def automatic(self, frame):
