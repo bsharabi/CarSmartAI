@@ -81,6 +81,7 @@ class CVThread(threading.Thread):
         self.mov_w = None
         self.mov_h = None
 
+        self.results=None
         self.radius = 0
         self.box_x = None
         self.box_y = None
@@ -157,11 +158,50 @@ class CVThread(threading.Thread):
             if self.drawing:
                 cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
        
+        elif self.CVMode == 'automatic':
+            def calculate_distance(known_width, focal_length, width_in_pixels):
+                return (known_width * focal_length) / width_in_pixels
+            if self.results :
+                # Coordinates and obstacle detection
+                distances = []
+                for r in self.results:
+                    boxes = r.boxes
+
+                    for box in boxes:
+                        # Bounding box
+                        x1, y1, x2, y2 = box.xyxy[0]
+                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)  # Convert to int values
+
+                        # Calculate the width of the detected object in pixels
+                        width_in_pixels = x2 - x1
+
+                        # Calculate the distance to the object
+                        distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, width_in_pixels)
+                        distances.append((distance, x1, y1, x2, y2))
+
+                        # Put bounding box in the image
+                        cv2.rectangle(imgInput, (x1, y1), (x2, y2), (255, 0, 255), 3)
+
+                        # Confidence
+                        confidence = math.ceil((box.conf[0] * 100)) / 100
+
+                        # Class name
+                        cls = int(box.cls[0])
+                        class_name = classNames[cls]
+
+                        # Object details
+                        org = (x1, y1 - 10)
+                        font = cv2.FONT_HERSHEY_SIMPLEX
+                        fontScale = 0.5
+                        color = (255, 0, 0)
+                        thickness = 2
+
+                        cv2.putText(imgInput, f"{class_name} {confidence:.2f} {distance:.2f}m", org, font, fontScale, color, thickness)
 
         return imgInput
 
 
-    def watchDog(self, imgInput:cv2.typing.MatLike):
+    def watchDog(self, imgInput):
         timestamp = datetime.datetime.now()
         gray = cv2.cvtColor(imgInput, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -210,46 +250,9 @@ class CVThread(threading.Thread):
         self.pause()
            
     def automatic(self, frame):
-        def calculate_distance(known_width, focal_length, width_in_pixels):
-            return (known_width * focal_length) / width_in_pixels
+        self.results = model(frame, stream=True)
+
         
-        results = model(frame, stream=True)
-
-        # Coordinates and obstacle detection
-        distances = []
-        for r in results:
-            boxes = r.boxes
-
-            for box in boxes:
-                # Bounding box
-                x1, y1, x2, y2 = box.xyxy[0]
-                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)  # Convert to int values
-
-                # Calculate the width of the detected object in pixels
-                width_in_pixels = x2 - x1
-
-                # Calculate the distance to the object
-                distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, width_in_pixels)
-                distances.append((distance, x1, y1, x2, y2))
-
-                # Put bounding box in the image
-                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
-
-                # Confidence
-                confidence = math.ceil((box.conf[0] * 100)) / 100
-
-                # Class name
-                cls = int(box.cls[0])
-                class_name = classNames[cls]
-
-                # Object details
-                org = (x1, y1 - 10)
-                font = cv2.FONT_HERSHEY_SIMPLEX
-                fontScale = 0.5
-                color = (255, 0, 0)
-                thickness = 2
-
-                cv2.putText(frame, f"{class_name} {confidence:.2f} {distance:.2f}m", org, font, fontScale, color, thickness)
 
 
     def findLineCtrl(self, posInput, setCenter):#2
