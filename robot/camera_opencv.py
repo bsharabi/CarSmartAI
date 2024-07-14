@@ -147,10 +147,6 @@ class CVThread(threading.Thread):
             if self.drawing:
                 cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
        
-        elif self.CVMode == 'automatic':
-            if self.drawing:
-                cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
-                cv2.putText(imgInput, f"cup ", (self.mov_x, self.mov_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,0), 2)
         return imgInput
 
 
