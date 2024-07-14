@@ -3,8 +3,8 @@ import time
 import RPi.GPIO as GPIO  # type: ignore
 import Adafruit_PCA9685
 import threading
-from UltrasonicSensor import UltrasonicSensor
-from RobotLight import RobotLight
+from .UltrasonicSensor import UltrasonicSensor
+from .RobotLight import RobotLight
 import settings
 
 class ServoCtrl(threading.Thread):
