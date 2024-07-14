@@ -3,16 +3,17 @@ import RPi.GPIO as GPIO # type: ignore
 import threading
 import Adafruit_PCA9685
 import os
-import UltrasonicSensor
-import Kalman_filter
+from .UltrasonicSensor import UltrasonicSensor
+from .Kalman_filter import KalmanFilter
 
-from RobotMove import RobotMove
-from RobotServos import ServoCtrl
+from .RobotMove import RobotMove
+from .RobotServos import ServoCtrl
 
 robot_move = RobotMove()
 sc = ServoCtrl()
+ultra = UltrasonicSensor()
 
-kalman_filter_X =  Kalman_filter.Kalman_filter(0.01,0.1)
+kalman_filter_X =  KalmanFilter(0.01,0.1)
 
 pwm = Adafruit_PCA9685.PCA9685()
 pwm.set_pwm_freq(50)
@@ -126,15 +127,15 @@ class Functions(threading.Thread):
 		if self.scanPos == 1:
 			pwm.set_pwm(self.scanServo, 0, sc.initPos[1]+self.scanRange)
 			time.sleep(0.3)
-			self.scanList[0] = UltrasonicSensor.checkdist()
+			self.scanList[0] = ultra.checkdist()
 		elif self.scanPos == 2:
 			pwm.set_pwm(self.scanServo, 0, sc.initPos[1])
 			time.sleep(0.3)
-			self.scanList[1] = UltrasonicSensor.checkdist()
+			self.scanList[1] = ultra.checkdist()
 		elif self.scanPos == 3:
 			pwm.set_pwm(self.scanServo, 0, sc.initPos[1]-self.scanRange)
 			time.sleep(0.3)
-			self.scanList[2] = UltrasonicSensor.checkdist()
+			self.scanList[2] = ultra.checkdist()
 
 		self.scanPos = self.scanPos + self.scanDir
 
@@ -167,9 +168,9 @@ class Functions(threading.Thread):
 # Filter out occasional incorrect distance data.
 	def distRedress(self): 
 		mark = 0
-		distValue = UltrasonicSensor.checkdist()* 100
+		distValue = ultra.checkdist()* 100
 		while True:
-			distValue = UltrasonicSensor.checkdist()* 100
+			distValue = ultra.checkdist()* 100
 			if distValue > 900:
 				mark +=  1
 			elif mark > 5 or distValue < 900:
@@ -234,14 +235,10 @@ class Functions(threading.Thread):
 		time.sleep(0.05)
 
 
-	# def speechRecProcessing(self):
-	# 	print('speechRecProcessing')
-	# 	speech.run()
-
 
 	def keepDisProcessing(self):
 		print('keepDistanceProcessing')
-		distanceGet = UltrasonicSensor.checkdist()
+		distanceGet = ultra.checkdist()
 		if distanceGet > (self.rangeKeep/2+0.1):
 			robot_move.move(80,'forward')
 			
