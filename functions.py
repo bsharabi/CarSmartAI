@@ -95,28 +95,30 @@ class Functions(threading.Thread):
 		self.resume()
 
 
-	def trackLineProcessing(self):
-		status_right = GPIO.input(line_pin_right)
-		status_middle = GPIO.input(line_pin_middle)
-		status_left = GPIO.input(line_pin_left)
-		#print('R%d   M%d   L%d'%(status_right,status_middle,status_left))
-		if status_middle == 1:
-			sc.moveAngle(2, 0)
-			robot_move.move(80,'forward')
-			
-		elif status_left == 1:
-			sc.moveAngle(2, 30)
-			robot_move.move(80,'forward')
-			
-		elif status_right == 1:
-			sc.moveAngle(2,-30)
-			robot_move.move(80,'forward')
-			
-		else:
-			robot_move.move(0,'forward')
-		print(status_left,status_middle,status_right)
-		time.sleep(0.1)
+def trackLineProcessing(self):
+    status_right = GPIO.input(self.line_pin_right)
+    status_middle = GPIO.input(self.line_pin_middle)
+    status_left = GPIO.input(self.line_pin_left)
 
+    # Check the status of the sensors and act accordingly
+    if status_middle == 0:  # Middle sensor detects the line
+        sc.moveAngle(2, 0)  # Keep the servo centered
+        robot_move.move(80, 'forward')  # Move forward
+
+    elif status_left == 0:  # Left sensor detects the line
+        sc.moveAngle(2, 30)  # Turn right
+        robot_move.move(80, 'forward')  # Move forward
+
+    elif status_right == 0:  # Right sensor detects the line
+        sc.moveAngle(2, -30)  # Turn left
+        robot_move.move(80, 'forward')  # Move forward
+
+    else:  # No sensor detects the line
+        robot_move.move(0, 'forward')  # Stop the robot
+
+    # Print sensor status for debugging
+    print(status_left, status_middle, status_right)
+    time.sleep(0.1)
 
 	def automaticProcessing(self):
 		print('automaticProcessing')
