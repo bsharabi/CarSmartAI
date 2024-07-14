@@ -70,8 +70,8 @@ colorLower = np.array([24, 100, 100])
 class CVThread(threading.Thread):
     font = cv2.FONT_HERSHEY_SIMPLEX
 
-    kalman_filter_X =  Kalman_filter.Kalman_filter(0.01,0.1)
-    kalman_filter_Y =  Kalman_filter.Kalman_filter(0.01,0.1)
+    kalman_filter_X =  Kalman_filter.KalmanFilter(0.01,0.1)
+    kalman_filter_Y =  Kalman_filter.KalmanFilter(0.01,0.1)
     P_direction = -1
     T_direction = -1
     P_servo = 1
