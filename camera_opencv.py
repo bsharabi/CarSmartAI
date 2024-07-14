@@ -271,8 +271,7 @@ class CVThread(threading.Thread):
 
         indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
         distances = []
-        (self.mov_x, self.mov_y, self.mov_w, self.mov_h) = x, y, w, h
-        self.drawing = 1
+        self.drawing = 0
 
         for i in range(len(boxes)):
             if i in indexes:
@@ -289,8 +288,8 @@ class CVThread(threading.Thread):
 
                     # Draw the bounding box and label
                     color = (255, 0, 0)
-                    cv2.rectangle(imgInput, (x, y), (x + w, y + h), color, 2)
                     cv2.putText(imgInput, f"{label} {confidence:.2f} {distance:.2f}m", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    self.drawing = 1
 
         # Obstacle avoidance logic
         if distances:
@@ -309,9 +308,8 @@ class CVThread(threading.Thread):
             else:
                 move_forward()
         else:
-            move_forward()      
-          
-     
+            move_forward()
+
         self.pause()
 
 
