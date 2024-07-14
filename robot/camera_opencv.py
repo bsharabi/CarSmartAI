@@ -151,7 +151,7 @@ class CVThread(threading.Thread):
         return imgInput
 
 
-    def watchDog(self, imgInput):
+    def watchDog(self, imgInput:cv2.typing.MatLike):
         timestamp = datetime.datetime.now()
         gray = cv2.cvtColor(imgInput, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
@@ -200,8 +200,12 @@ class CVThread(threading.Thread):
         self.pause()
            
     def automatic(self, frame):
-       
-
+        """
+        Process the frame to detect cones, determine direction, and issue drive commands.
+        
+        Args:
+            frame (numpy.ndarray): The frame from the camera.
+        """
         frame_height, frame_width = frame.shape[:2]
         contours = detect_cones(frame)
         cone_centers = [get_center(contour) for contour in contours if get_center(contour)]
@@ -213,7 +217,6 @@ class CVThread(threading.Thread):
         direction = get_direction(cone_centers, frame_width)
         print("Direction:", direction)
         drive(direction)  # Call the drive function to move the robot
-        pass
 
 
     def findLineCtrl(self, posInput, setCenter):#2
