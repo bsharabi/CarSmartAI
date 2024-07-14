@@ -86,6 +86,8 @@ class CVThread(threading.Thread):
         self.box_x = None
         self.box_y = None
         self.drawing = 0
+        self.frame_skip = 5
+        self.frame_count = 0
 
         self.findColorDetection = 0
 
@@ -159,9 +161,10 @@ class CVThread(threading.Thread):
                 cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
        
         elif self.CVMode == 'automatic':
+            self.frame_count += 1
             def calculate_distance(known_width, focal_length, width_in_pixels):
                 return (known_width * focal_length) / width_in_pixels
-            if self.results :
+            if self.results and self.frame_count % self.frame_skip == 0:
                 # Coordinates and obstacle detection
                 distances = []
                 for r in self.results:
