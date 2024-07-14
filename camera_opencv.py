@@ -13,6 +13,43 @@ import threading
 import imutils # type: ignore
 from RobotLight import RobotLight
 
+weights_path = "yolov3.weights"
+config_path = "yolov3.cfg"
+names_path = "coco.names"
+
+# Load YOLO model
+net = cv2.dnn.readNet(weights_path, config_path)
+layer_names = net.getLayerNames()
+output_layers = [layer_names[i - 1] for i in net.getUnconnectedOutLayers()]
+
+# Load object classes
+classNames = []
+with open(names_path, "r") as f:
+    classNames = [line.strip() for line in f.readlines()]
+
+# Function to calculate distance from the camera to the object
+KNOWN_WIDTH = 0.0856  # Example width, use your own known object's width
+FOCAL_LENGTH = 700  # Example value, replace with your calculated focal length
+
+def calculate_distance(known_width, focal_length, width_in_pixels):
+    return (known_width * focal_length) / width_in_pixels
+
+# Movement functions
+def move_forward():
+    print("Moving forward")
+
+def move_backward():
+    print("Moving backward")
+
+def move_left():
+    print("Moving left")
+
+def move_right():
+    print("Moving right")
+
+def stop():
+    print("Stopping")
+
 robot_move=RobotMove()
 led = RobotLight()
 pid = PID.PID()
@@ -200,57 +237,81 @@ class CVThread(threading.Thread):
             # switch.switch(2,0)
             # switch.switch(3,0)
         self.pause()
-        
+           
     def automatic(self, imgInput):
-        timestamp = datetime.datetime.now()
-        gray = cv2.cvtColor(imgInput, cv2.COLOR_BGR2GRAY)
-        gray = cv2.GaussianBlur(gray, (21, 21), 0)
+        height, width, channels = imgInput.shape
+        blob = cv2.dnn.blobFromImage(imgInput, 0.00392, (416, 416), (0, 0, 0), True, crop=False)
+        net.setInput(blob)
+        outs = net.forward(output_layers)
 
-        if self.avg is None:
-            print("[INFO] starting background model...")
-            self.avg = gray.copy().astype("float")
-            return 'background model'
+        # Coordinates and obstacle detection
+        class_ids = []
+        confidences = []
+        boxes = []
 
-        cv2.accumulateWeighted(gray, self.avg, 0.5)
-        self.frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg))
+        for out in outs:
+            for detection in out:
+                scores = detection[5:]
+                class_id = np.argmax(scores)
+                confidence = scores[class_id]
+                if confidence > 0.5:
+                    # Object detected
+                    center_x = int(detection[0] * width)
+                    center_y = int(detection[1] * height)
+                    w = int(detection[2] * width)
+                    h = int(detection[3] * height)
 
-        # threshold the delta image, dilate the thresholded image to fill
-        # in holes, then find contours on thresholded image
-        self.thresh = cv2.threshold(self.frameDelta, 5, 255,
-            cv2.THRESH_BINARY)[1]
-        self.thresh = cv2.dilate(self.thresh, None, iterations=2)
-        self.cnts = cv2.findContours(self.thresh.copy(), cv2.RETR_EXTERNAL,
-            cv2.CHAIN_APPROX_SIMPLE)
-        self.cnts = imutils.grab_contours(self.cnts)
-        # loop over the contours
-        for c in self.cnts:
-            # if the contour is too small, ignore it
-            if cv2.contourArea(c) < 5000:
-                continue
+                    # Rectangle coordinates
+                    x = int(center_x - w / 2)
+                    y = int(center_y - h / 2)
+
+                    boxes.append([x, y, w, h])
+                    confidences.append(float(confidence))
+                    class_ids.append(class_id)
+
+        indexes = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+        distances = []
+        (self.mov_x, self.mov_y, self.mov_w, self.mov_h) = x, y, w, h
+        self.drawing = 1
+
+        for i in range(len(boxes)):
+            if i in indexes:
+                x, y, w, h = boxes[i]
+                class_id = class_ids[i]
+                label = str(classNames[class_id])
+                confidence = confidences[i]
+
+                # Check if the detected object is a cup
+                if label == "cup":
+                    # Calculate the distance to the object
+                    distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, w)
+                    distances.append((distance, x, y, x + w, y + h))
+
+                    # Draw the bounding box and label
+                    color = (255, 0, 0)
+                    cv2.rectangle(imgInput, (x, y), (x + w, y + h), color, 2)
+                    cv2.putText(imgInput, f"{label} {confidence:.2f} {distance:.2f}m", (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+        # Obstacle avoidance logic
+        if distances:
+            closest_object = min(distances, key=lambda x: x[0])  # Find the closest object
+            distance, x1, y1, x2, y2 = closest_object
+
+            if distance < 0.2:  # Example threshold distance in meters
+                center_x = (x1 + x2) // 2
+
+                if center_x < imgInput.shape[1] // 3:
+                    move_right()
+                elif center_x > 2 * imgInput.shape[1] // 3:
+                    move_left()
+                else:
+                    move_backward()
+            else:
+                move_forward()
+        else:
+            move_forward()      
+          
      
-            # compute the bounding box for the contour, draw it on the frame,
-            # and update the text
-            (self.mov_x, self.mov_y, self.mov_w, self.mov_h) = cv2.boundingRect(c)
-            self.drawing = 1
-            
-            self.motionCounter += 1
-            # print(self.motionCounter)
-            self.lastMovtionCaptured = timestamp
-            led.breath(255,78,0)
-            led.both_off()
-            led.red()
-            # switch.switch(1,1)
-            # switch.switch(2,1)
-            # switch.switch(3,1)
-
-        if (timestamp - self.lastMovtionCaptured).seconds >= 0.5:
-            led.breath(0,78,255)
-            led.both_off()
-            led.blue()
-            self.drawing = 0
-            # switch.switch(1,0)
-            # switch.switch(2,0)
-            # switch.switch(3,0)
         self.pause()
 
 
