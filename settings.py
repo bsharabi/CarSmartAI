@@ -70,3 +70,10 @@ ANGLE_RATE = 1
 
 # Line following color selection (0 for white line, 1 for black line)
 COLOR_SELECT = 1
+
+
+# server settings 
+HOST = ''
+PORT = 10223  # Define port serial 
+BUFSIZ = 1024  # Define buffer size
+ADDR = (HOST, PORT)
