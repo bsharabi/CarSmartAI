@@ -402,7 +402,7 @@ async def recv_msg(websocket):
         elif isinstance(data, dict):
             if data['title'] == "findColorSet":
                 color = data['data']
-                app.colorFindSet(color[0], color[1], color[2])
+                flask_app.colorFindSet(color[0], color[1], color[2])
 
         print(data)
         response = json.dumps(response)
