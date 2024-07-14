@@ -147,6 +147,7 @@ class CVThread(threading.Thread):
             if self.drawing:
                 cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
        
+
         return imgInput
 
 
