@@ -26,8 +26,8 @@ def detect_cones(frame):
     mask2 = cv2.inRange(hsv, LOWER_RED_2, UPPER_RED_2)
     mask = mask1 | mask2
     
-    mask = cv2.erode(mask, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
+    mask = cv2.erode(mask, None, iterations=100)
+    mask = cv2.dilate(mask, None, iterations=100)
 
     # Handle different OpenCV versions
     contours = None
