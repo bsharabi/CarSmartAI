@@ -414,38 +414,37 @@ class ServoCtrl(threading.Thread):
 
         :return: Scan result as a string
         """
-        scan_result = 'U: '
-        scan_speed = 1
-        pwm1_pos = self.initPos[settings.SERVO_MID_HEAD]
-        self.robot_light.cyan()
-        if self.sc_direction[settings.SERVO_MID_HEAD]:
-            pwm1_pos = self.maxPos[settings.SERVO_MID_HEAD]
-            self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
-            time.sleep(0.5)
-            scan_result += str(self.ultrasonic_sensor.get_distance())
-            scan_result += ' '
-            while pwm1_pos > self.minPos[settings.SERVO_MID_HEAD]:
-                pwm1_pos -= scan_speed
-                self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
-                scan_result += str(self.ultrasonic_sensor.get_distance())
-                scan_result += ' '
-            self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, self.initPos[settings.SERVO_MID_HEAD])
-            pwm1_pos = self.initPos[settings.SERVO_MID_HEAD]
+        scan_speed = 3
+        result = []
+
+        if self.sc_direction[0]:
+            pwm0_pos = self.maxPos[0]
+            self.pwm.set_pwm(1, 0, pwm0_pos)
+            time.sleep(0.8)
+
+            while pwm0_pos>self.minPos[0]:
+                pwm0_pos-=scan_speed
+                self.pwm.set_pwm(1, 0, pwm0_pos)
+                dist = self.ultrasonic_sensor.get_distance()
+                if dist > 20:
+                    continue
+                theta = 180 - (pwm0_pos-100)/2.55 # +30 deviation
+                result.append([dist, theta])
         else:
-            pwm1_pos = self.minPos[settings.SERVO_MID_HEAD]
-            self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
-            time.sleep(0.5)
-            scan_result += str(self.ultrasonic_sensor.get_distance())
-            scan_result += ' '
-            while pwm1_pos < self.maxPos[settings.SERVO_MID_HEAD]:
-                pwm1_pos += scan_speed
-                self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, pwm1_pos)
-                scan_result += str(self.ultrasonic_sensor.get_distance())
-                scan_result += ' '
-            self.pwm.set_pwm(settings.SERVO_MID_HEAD, 0, self.initPos[settings.SERVO_MID_HEAD])
-            pwm1_pos = self.initPos[settings.SERVO_MID_HEAD]
-        self.robot_light.both_on()
-        return scan_result
+            pwm0_pos = self.minPos[0]
+            self.pwm.set_pwm(1, 0, pwm0_pos)
+            time.sleep(0.8)
+
+            while pwm0_pos<self.maxPos[0]:
+                pwm0_pos+=scan_speed
+                self.pwm.set_pwm(1, 0, pwm0_pos)
+                dist = self.ultrasonic_sensor.get_distance()
+                if dist > 20:
+                    continue
+                theta = (pwm0_pos-100)/2.55
+                result.append([dist, theta])
+        self.pwm.set_pwm(1, 0, self.initPos[0])
+        return result
 
     def ctrl_range(self, raw, max_genout, min_genout):
         """
