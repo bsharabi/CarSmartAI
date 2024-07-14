@@ -18,10 +18,6 @@ pwm = Adafruit_PCA9685.PCA9685()
 pwm.set_pwm_freq(50)
 
 
-
-
-
-
 line_pin_right = 20
 line_pin_middle = 16
 line_pin_left = 19
@@ -104,15 +100,15 @@ class Functions(threading.Thread):
 		status_middle = GPIO.input(line_pin_middle)
 		status_left = GPIO.input(line_pin_left)
 		#print('R%d   M%d   L%d'%(status_right,status_middle,status_left))
-		if status_middle == 0:
+		if status_middle == 1:
 			sc.moveAngle(2, 0)
 			robot_move.move(80,'forward')
 			
-		elif status_left == 0:
+		elif status_left == 1:
 			sc.moveAngle(2, 30)
 			robot_move.move(80,'forward')
 			
-		elif status_right == 0:
+		elif status_right == 1:
 			sc.moveAngle(2,-30)
 			robot_move.move(80,'forward')
 			

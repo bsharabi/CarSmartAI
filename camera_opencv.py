@@ -166,7 +166,6 @@ class CVThread(threading.Thread):
         self.cnts = cv2.findContours(self.thresh.copy(), cv2.RETR_EXTERNAL,
             cv2.CHAIN_APPROX_SIMPLE)
         self.cnts = imutils.grab_contours(self.cnts)
-        print('x')
         # loop over the contours
         for c in self.cnts:
             # if the contour is too small, ignore it
