@@ -196,6 +196,58 @@ class CVThread(threading.Thread):
             # switch.switch(2,0)
             # switch.switch(3,0)
         self.pause()
+        
+    def automatic(self, imgInput):
+        timestamp = datetime.datetime.now()
+        gray = cv2.cvtColor(imgInput, cv2.COLOR_BGR2GRAY)
+        gray = cv2.GaussianBlur(gray, (21, 21), 0)
+
+        if self.avg is None:
+            print("[INFO] starting background model...")
+            self.avg = gray.copy().astype("float")
+            return 'background model'
+
+        cv2.accumulateWeighted(gray, self.avg, 0.5)
+        self.frameDelta = cv2.absdiff(gray, cv2.convertScaleAbs(self.avg))
+
+        # threshold the delta image, dilate the thresholded image to fill
+        # in holes, then find contours on thresholded image
+        self.thresh = cv2.threshold(self.frameDelta, 5, 255,
+            cv2.THRESH_BINARY)[1]
+        self.thresh = cv2.dilate(self.thresh, None, iterations=2)
+        self.cnts = cv2.findContours(self.thresh.copy(), cv2.RETR_EXTERNAL,
+            cv2.CHAIN_APPROX_SIMPLE)
+        self.cnts = imutils.grab_contours(self.cnts)
+        # loop over the contours
+        for c in self.cnts:
+            # if the contour is too small, ignore it
+            if cv2.contourArea(c) < 5000:
+                continue
+     
+            # compute the bounding box for the contour, draw it on the frame,
+            # and update the text
+            (self.mov_x, self.mov_y, self.mov_w, self.mov_h) = cv2.boundingRect(c)
+            self.drawing = 1
+            
+            self.motionCounter += 1
+            print(self.motionCounter)
+            self.lastMovtionCaptured = timestamp
+            led.breath(255,78,0)
+            led.both_off()
+            led.red()
+            # switch.switch(1,1)
+            # switch.switch(2,1)
+            # switch.switch(3,1)
+
+        if (timestamp - self.lastMovtionCaptured).seconds >= 0.5:
+            led.breath(0,78,255)
+            led.both_off()
+            led.blue()
+            self.drawing = 0
+            # switch.switch(1,0)
+            # switch.switch(2,0)
+            # switch.switch(3,0)
+        self.pause()
 
 
     def findLineCtrl(self, posInput, setCenter):#2
@@ -354,6 +406,10 @@ class CVThread(threading.Thread):
             elif self.CVMode == 'watchDog':
                 self.CVThreading = 1
                 self.watchDog(self.imgCV)
+                self.CVThreading = 0
+            elif self.CVMode == 'automatic':
+                self.CVThreading = 1
+                self.automatic(self.imgCV)
                 self.CVThreading = 0
             pass
 

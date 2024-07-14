@@ -88,18 +88,14 @@ def functionSelect(command_input, response):
 		RL.police()
 	
 	elif 'automaticOff' == command_input:
-		RL.pause()
-		fuc.pause()
-		robot_move.motor_stop()
-		time.sleep(0.3)
+		flask_app.modeselect('none')
+		RL.switch(1,0)
+		RL.switch(2,0)
+		RL.switch(3,0)
 		robot_move.motor_stop()
 
 	elif 'automatic' == command_input:
-
-		if modeSelect == 'PT':
-			fuc.automatic()
-		else:
-			fuc.pause()
+		flask_app.modeselect('automatic')
 
 	elif 'automaticOff' == command_input:
 		fuc.pause()
