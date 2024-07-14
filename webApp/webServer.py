@@ -20,10 +20,6 @@ modeSelect = 'none'
 direction_command = 'no'
 turn_command = 'no'
 
-# Initialize function handler
-
-
-
 try:
     RL = RobotLight()
     RL.start()
@@ -35,6 +31,8 @@ try:
     robot_move.start()  # Start the thread
     fuc = Functions()
     fuc.start()
+    flask_app = app.webapp()
+    flask_app.startthread()
 except:
     print('Use "sudo pip3 install rpi_ws281x" to install WS_281x package\n"sudo pip3 install rpi_ws281x"')
     pass
@@ -80,13 +78,13 @@ def functionSelect(command_input, response):
 
     elif 'findColor' == command_input:
         if modeSelect == 'PT':
-            app.modeselect('findColor')
+            flask_app.modeselect('findColor')
 
     elif 'motionGet' == command_input:
-        app.modeselect('watchDog')
+        flask_app.modeselect('watchDog')
 
     elif 'stopCV' == command_input:
-        app.modeselect('none')
+        flask_app.modeselect('none')
         RL.switch(1, 0)
         RL.switch(2, 0)
         RL.switch(3, 0)
@@ -98,14 +96,14 @@ def functionSelect(command_input, response):
         RL.police()
 
     elif 'automaticOff' == command_input:
-        app.modeselect('none')
+        flask_app.modeselect('none')
         RL.switch(1, 0)
         RL.switch(2, 0)
         RL.switch(3, 0)
         robot_move.motor_stop()
 
     elif 'automatic' == command_input:
-        app.modeselect('automatic')
+        flask_app.modeselect('automatic')
 
     elif 'automaticOff' == command_input:
         fuc.pause()
@@ -383,7 +381,7 @@ async def recv_msg(websocket):
 
             # CVFL
             elif 'CVFL' == data:
-                app.modeselect('findlineCV')
+                flask_app.modeselect('findlineCV')
 
             elif 'CVFLColorSet' in data:
                 color = int(data.split()[1])
@@ -433,9 +431,7 @@ def cleanup():
 
 def run():
 
-    global flask_app
-    flask_app = app.webapp()
-    flask_app.startthread()
+
     RL.set_all_switch_off()
 
     while 1:
