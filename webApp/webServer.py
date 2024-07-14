@@ -8,7 +8,7 @@ from robot.RobotMove import RobotMove
 from robot.RobotServos import ServoCtrl
 from robot.RobotLight import RobotLight
 from robot.functions import Functions
-import app
+import webApp.app as app
 from settings import *
 
 # Global variables
