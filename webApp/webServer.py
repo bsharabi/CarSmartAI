@@ -71,7 +71,7 @@ def functionSelect(command_input, response):
     global functionMode
     if 'scan' == command_input:
         if modeSelect == 'PT':
-            radar_send = fuc.radarScan()
+            radar_send = sc.radarScan()
             print(radar_send)
             response['title'] = 'scanResult'
             response['data'] = radar_send

@@ -258,8 +258,6 @@ class Functions(threading.Thread):
 			self.steadyProcessing()
 		elif self.functionMode == 'trackLine':
 			self.trackLineProcessing()
-		# elif self.functionMode == 'speechRecProcessing':
-		# 	self.speechRecProcessing()
 		elif self.functionMode == 'keepDistance':
 			self.keepDisProcessing()
 
