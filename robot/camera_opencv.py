@@ -9,8 +9,18 @@ import datetime
 import robot.Kalman_filter as Kalman_filter
 import robot.PID as PID
 import threading
+import math
 import imutils 
-
+import numpy as np
+from ultralytics import YOLO
+# Known width of the object (in meters)
+KNOWN_WIDTH = 0.0856  # Example width, use your own known object's width
+# Focal length in pixels (calibrate your camera to find this value)
+FOCAL_LENGTH = 700  # Example value, replace with your calculated focal length
+YOLO_PATH = "yolo-Weights"  # Replace with the actual path
+YOLO_WEIGHTS = os.path.join(YOLO_PATH, "yolov8n.pt")
+YOLO_NAMES = os.path.join(YOLO_PATH, "coco.names")
+model = YOLO(YOLO_WEIGHTS)
 
 robot_move = RobotMove()
 led = RobotLight()
@@ -31,6 +41,11 @@ ImgIsNone = 0
 colorUpper = np.array([44, 255, 255])
 colorLower = np.array([24, 100, 100])
 
+
+
+
+with open(YOLO_NAMES, "r") as f:
+    classNames = [line.strip() for line in f.readlines()]
     
 class CVThread(threading.Thread):
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -195,7 +210,46 @@ class CVThread(threading.Thread):
         self.pause()
            
     def automatic(self, frame):
-        pass
+        def calculate_distance(known_width, focal_length, width_in_pixels):
+            return (known_width * focal_length) / width_in_pixels
+        
+        results = model(frame, stream=True)
+
+        # Coordinates and obstacle detection
+        distances = []
+        for r in results:
+            boxes = r.boxes
+
+            for box in boxes:
+                # Bounding box
+                x1, y1, x2, y2 = box.xyxy[0]
+                x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)  # Convert to int values
+
+                # Calculate the width of the detected object in pixels
+                width_in_pixels = x2 - x1
+
+                # Calculate the distance to the object
+                distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, width_in_pixels)
+                distances.append((distance, x1, y1, x2, y2))
+
+                # Put bounding box in the image
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (255, 0, 255), 3)
+
+                # Confidence
+                confidence = math.ceil((box.conf[0] * 100)) / 100
+
+                # Class name
+                cls = int(box.cls[0])
+                class_name = classNames[cls]
+
+                # Object details
+                org = (x1, y1 - 10)
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                fontScale = 0.5
+                color = (255, 0, 0)
+                thickness = 2
+
+                cv2.putText(frame, f"{class_name} {confidence:.2f} {distance:.2f}m", org, font, fontScale, color, thickness)
 
 
     def findLineCtrl(self, posInput, setCenter):#2
