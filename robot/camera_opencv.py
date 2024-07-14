@@ -33,14 +33,19 @@ ImgIsNone = 0
 colorUpper = np.array([44, 255, 255])
 colorLower = np.array([24, 100, 100])
 
+# Paths to YOLO files
+YOLO_PATH = "."  # Replace with the actual path
+YOLO_WEIGHTS = os.path.join(YOLO_PATH, "yolov3.weights")
+YOLO_CFG = os.path.join(YOLO_PATH, "yolov3.cfg")
+YOLO_NAMES = os.path.join(YOLO_PATH, "coco.names")
+
 # Load YOLO
-net = cv2.dnn.readNet("yolov3.weights", "yolov3.cfg")
+net = cv2.dnn.readNet(YOLO_WEIGHTS, YOLO_CFG)
 layer_names = net.getLayerNames()
 output_layers = [layer_names[i[0] - 1] for i in net.getUnconnectedOutLayers()]
-with open("coco.names", "r") as f:
+with open(YOLO_NAMES, "r") as f:
     classes = [line.strip() for line in f.readlines()]
-
-
+    
 class CVThread(threading.Thread):
     font = cv2.FONT_HERSHEY_SIMPLEX
 
