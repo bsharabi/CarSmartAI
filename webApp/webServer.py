@@ -8,6 +8,7 @@ from robot.RobotMove import RobotMove
 from robot.RobotServos import ServoCtrl
 from robot.RobotLight import RobotLight
 from robot.functions import Functions
+from robot.UltrasonicSensor import UltrasonicSensor
 import webApp.app as app
 from settings import *
 
@@ -27,11 +28,13 @@ try:
     robot_info = RobotInfo()
     robot_move = RobotMove()
     sc = ServoCtrl()
+    fuc = Functions()
+    flask_app = app.webapp()
+    ultra = UltrasonicSensor()
+    ultra.start()
     sc.start()
     robot_move.start()  # Start the thread
-    fuc = Functions()
     fuc.start()
-    flask_app = app.webapp()
     flask_app.startthread()
 except:
     print('Use "sudo pip3 install rpi_ws281x" to install WS_281x package\n"sudo pip3 install rpi_ws281x"')
@@ -424,8 +427,10 @@ def cleanup():
     Stop all systems and clean up.
     """
     robot_move.terminate()
+    ultra.terminate()
     RL.pause()
     sc.terminate()
+    ultra.join()
     robot_move.join()
     sc.join()
 
