@@ -156,15 +156,15 @@ class CVThread(threading.Thread):
                 pass
         elif self.CVMode == 'watchDog':
             if self.drawing:
-                cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h),
-                              (128, 255, 0), 1)
-            for i in range(len(self.boxes)):
-                if i in self.indexes:
-                    x, y, w, h = self.boxes[i]
-                    label = str(classes[self.class_ids[i]])
-                    color = (0, 255, 0)
-                    cv2.rectangle(imgInput, (x, y), (x + w, y + h), color, 2)
-                    cv2.putText(imgInput, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                # cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h),
+                #               (128, 255, 0), 1)
+                for i in range(len(self.boxes)):
+                    if i in self.indexes:
+                        x, y, w, h = self.boxes[i]
+                        label = str(classes[self.class_ids[i]])
+                        color = (0, 255, 0)
+                        cv2.rectangle(imgInput, (x, y), (x + w, y + h), color, 2)
+                        cv2.putText(imgInput, label, (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
         return imgInput
 
     def watchDog(self, imgInput):
