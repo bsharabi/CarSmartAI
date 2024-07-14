@@ -65,7 +65,7 @@ class Functions(threading.Thread):
 
 	def pause(self):
 		self.functionMode = 'none'
-		robot_move.motorStop()
+		robot_move.motor_stop()
 		self.__flag.clear()
 
 
@@ -252,7 +252,7 @@ class Functions(threading.Thread):
 			robot_move.move(80,'backward')
 			
 		else:
-			robot_move.motorStop()
+			robot_move.motor_stop()
 
 
 	def functionGoing(self):
@@ -291,4 +291,4 @@ if __name__ == '__main__':
 		# time.sleep(1)
 		# move.move(80, 'no', 'no', 0.5)
 	except KeyboardInterrupt:
-			robot_move.motorStop()
+			robot_move.motor_stop()

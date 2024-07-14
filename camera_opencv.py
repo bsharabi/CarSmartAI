@@ -202,7 +202,7 @@ class CVThread(threading.Thread):
     def findLineCtrl(self, posInput, setCenter):#2
         if posInput:
             if posInput > (setCenter + findLineError):
-                # move.motorStop()
+                # move.motor_stop()
                 #turnRight
                 error = (posInput-320)/3
                 outv = int(round((pid.GenOut(error)),0))
@@ -211,10 +211,10 @@ class CVThread(threading.Thread):
                     robot_move.move(80,'forward')
                     
                 else:
-                   robot_move.motorStop()
+                   robot_move.motor_stop()
                 pass
             elif posInput < (setCenter - findLineError):
-                # move.motorStop()
+                # move.motor_stop()
                 #turnLeft
                 error = (320-posInput)/3
                 outv = int(round((pid.GenOut(error)),0))
@@ -224,14 +224,14 @@ class CVThread(threading.Thread):
                     robot_move.move(80,'forward')
                     
                 else:
-                    robot_move.motorStop()
+                    robot_move.motor_stop()
                 pass
             else:
                 if CVRun:
                     robot_move.move(80,'forward')
                     
                 else:
-                    robot_move.motorStop()
+                    robot_move.motor_stop()
                 #forward
                 pass
         else:
@@ -329,7 +329,7 @@ class CVThread(threading.Thread):
                 print('unlocked')
         else:
             self.findColorDetection = 0
-            robot_move.motorStop()
+            robot_move.motor_stop()
         self.pause()
 
 
