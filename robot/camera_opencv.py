@@ -34,7 +34,7 @@ colorUpper = np.array([44, 255, 255])
 colorLower = np.array([24, 100, 100])
 
 # Paths to YOLO files
-YOLO_PATH = "."  # Replace with the actual path
+YOLO_PATH = "robot"  # Replace with the actual path
 YOLO_WEIGHTS = os.path.join(YOLO_PATH, "yolov3.weights")
 YOLO_CFG = os.path.join(YOLO_PATH, "yolov3.cfg")
 YOLO_NAMES = os.path.join(YOLO_PATH, "coco.names")
