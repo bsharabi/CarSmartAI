@@ -151,7 +151,7 @@ class CVThread(threading.Thread):
         return imgInput
 
 
-    def watchDog(self, imgInput:cv2.typing.MatLike):
+    def watchDog(self, imgInput):
         timestamp = datetime.datetime.now()
         gray = cv2.cvtColor(imgInput, cv2.COLOR_BGR2GRAY)
         gray = cv2.GaussianBlur(gray, (21, 21), 0)
