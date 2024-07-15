@@ -108,12 +108,6 @@ def functionSelect(command_input, response):
     elif 'automatic' == command_input:
         flask_app.modeselect('automatic')
 
-    elif 'automaticOff' == command_input:
-        fuc.pause()
-        robot_move.motor_stop()
-        time.sleep(0.2)
-        robot_move.motor_stop()
-
     elif 'trackLine' == command_input:
         sc.moveInit()
         fuc.trackLine()
