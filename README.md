@@ -11,6 +11,7 @@ This repository contains the code for an autonomous robot vehicle designed to fo
     - [webApp](#webapp)
     - [Distance Keeping](#distance-keeping)
     - [Find color](#find-color)
+    - [Motion get](#motion-get)
   - [Hardware Requirements](#hardware-requirements)
   - [Software Requirements](#software-requirements)
   - [Installation](#installation)
@@ -46,6 +47,8 @@ The autonomous robot vehicle is designed to demonstrate the capabilities of mode
 ![Alt text](images/kdv2.gif)
 ### Find color
 ![Alt text](images/findColor.gif)
+### Motion get
+![Alt text](images/det.gif)
 
 ## Hardware Requirements
 - Raspberry Pi (any model with GPIO pins)
