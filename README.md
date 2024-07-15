@@ -47,7 +47,7 @@ The autonomous robot vehicle is designed to demonstrate the capabilities of mode
 ### Distance Keeping
 ![Alt text](images/kdv2.gif)
 ### Find color
-![Alt text](images/findCol.gif)
+![Alt text](images/findcol.gif)
 ### Motion get
 ![Alt text](images/detect.gif)
 ### Automatic
