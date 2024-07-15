@@ -41,11 +41,11 @@ The autonomous robot vehicle is designed to demonstrate the capabilities of mode
 
 ## Example
 ### webApp
-![Alt text](images\webapp.png)
+![Alt text](images/webapp.png)
 ### Distance Keeping
-![Alt text](images\kdv2.gif)
+![Alt text](images/kdv2.gif)
 ### Find color
-![Alt text](images\findColor.gif)
+![Alt text](images/findColor.gif)
 
 ## Hardware Requirements
 - Raspberry Pi (any model with GPIO pins)
