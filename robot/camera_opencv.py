@@ -5,6 +5,7 @@ from .RobotServos import ServoCtrl
 from .RobotMove import RobotMove
 from .RobotLight import RobotLight
 import numpy as np
+import settings
 import datetime
 import robot.Kalman_filter as Kalman_filter
 import robot.PID as PID
@@ -12,7 +13,7 @@ import threading
 import math
 import imutils 
 import numpy as np
-from ultralytics import YOLO
+
 # Known width of the object (in meters)
 KNOWN_WIDTH = 0.0856  # Example width, use your own known object's width
 # Focal length in pixels (calibrate your camera to find this value)
@@ -20,10 +21,28 @@ FOCAL_LENGTH = 700  # Example value, replace with your calculated focal length
 YOLO_PATH = "yolo-Weights"  # Replace with the actual path
 YOLO_WEIGHTS = os.path.join(YOLO_PATH, "yolov8n.pt")
 YOLO_NAMES = os.path.join(YOLO_PATH, "coco.names")
-model = YOLO(YOLO_WEIGHTS)
+YOLO_DEPLOY = os.path.join(YOLO_PATH, "deploy.prototxt")
+YOLO_MOBILENET = os.path.join(YOLO_PATH, "mobilenet_iter_73000.caffemodel")
+# model = YOLO(YOLO_WEIGHTS)
+
+# with open(YOLO_NAMES, "r") as f:
+#     classNames = [line.strip() for line in f.readlines()]
+# # Load pre-trained MobileNet SSD model and the corresponding class labels
+net = cv2.dnn.readNetFromCaffe(
+    YOLO_DEPLOY,
+    YOLO_MOBILENET
+)
+
+classNames = ["background", "aeroplane", "bicycle", "bird", "boat",
+              "bottle", "bus", "car", "cat", "chair", "cow", "diningtable",
+              "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
+              "sofa", "train", "tvmonitor"]
 
 robot_move = RobotMove()
 led = RobotLight()
+scGear = ServoCtrl()
+scGear.moveInit()
+robot_move=RobotMove()
 pid = PID.PID()
 pid.SetKp(0.5)
 pid.SetKd(0)
@@ -41,11 +60,49 @@ ImgIsNone = 0
 colorUpper = np.array([44, 255, 255])
 colorLower = np.array([24, 100, 100])
 
+def calculate_distance(known_width, focal_length, width_in_pixels):
+    """
+    Calculate the distance to an object using its known width and the width in pixels.
 
+    :param known_width: The known width of the object in meters.
+    :param focal_length: The focal length of the camera in pixels.
+    :param width_in_pixels: The width of the object in the image in pixels.
+    :return: The distance to the object in meters.
+    """
+    return (known_width * focal_length) / width_in_pixels
 
+def move_forward():
+    """
+    Move the robot forward.
+    """
+    robot_move.move(settings.MOTOR_SPEED, 'forward')
 
-with open(YOLO_NAMES, "r") as f:
-    classNames = [line.strip() for line in f.readlines()]
+def move_backward():
+    """
+    Move the robot backward.
+    """
+    robot_move.move(settings.MOTOR_SPEED, 'backward')
+
+def move_left():
+    """
+    Move the robot to the left.
+    """
+    scGear.turnLeft(settings.ANGLE_RATE)
+    robot_move.move(settings.MOTOR_SPEED, 'forward')
+
+def move_right():
+    """
+    Move the robot to the right.
+    """
+    scGear.turnRight(settings.ANGLE_RATE)
+    robot_move.move(settings.MOTOR_SPEED, 'forward')
+
+def stop():
+    """
+    Stop the robot.
+    """
+    robot_move.move(0, 'none')
+
     
 class CVThread(threading.Thread):
     font = cv2.FONT_HERSHEY_SIMPLEX
@@ -157,49 +214,64 @@ class CVThread(threading.Thread):
                 pass
 
         elif self.CVMode == 'watchDog':
-            if self.drawing:
-                cv2.rectangle(imgInput, (self.mov_x, self.mov_y), (self.mov_x + self.mov_w, self.mov_y + self.mov_h), (128, 255, 0), 1)
-       
+            h, w = imgInput.shape[:2]
+            blob = cv2.dnn.blobFromImage(cv2.resize(imgInput, (300, 300)), 0.007843, (300, 300), 127.5)
+            net.setInput(blob)
+            detections = net.forward()
+
+            for i in range(detections.shape[2]):
+                confidence = detections[0, 0, i, 2]
+                if confidence > 0.2:  # Confidence threshold
+                    idx = int(detections[0, 0, i, 1])
+                    box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                    (x1, y1, x2, y2) = box.astype("int")
+                    width_in_pixels = x2 - x1
+                    label = "{}".format(classNames[idx])
+                    cv2.rectangle(imgInput, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                    cv2.putText(imgInput, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                 
         elif self.CVMode == 'automatic':
-            self.frame_count += 1
-            def calculate_distance(known_width, focal_length, width_in_pixels):
-                return (known_width * focal_length) / width_in_pixels
-            if self.results and self.frame_count % self.frame_skip == 0:
-                # Coordinates and obstacle detection
-                distances = []
-                for r in self.results:
-                    boxes = r.boxes
+            h, w = imgInput.shape[:2]
+            blob = cv2.dnn.blobFromImage(cv2.resize(imgInput, (300, 300)), 0.007843, (300, 300), 127.5)
+            net.setInput(blob)
+            detections = net.forward()
 
-                    for box in boxes:
-                        # Bounding box
-                        x1, y1, x2, y2 = box.xyxy[0]
-                        x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)  # Convert to int values
+            distances = []
 
-                        # Calculate the width of the detected object in pixels
-                        width_in_pixels = x2 - x1
+            for i in range(detections.shape[2]):
+                confidence = detections[0, 0, i, 2]
+                if confidence > 0.2:  # Confidence threshold
+                    idx = int(detections[0, 0, i, 1])
+                    box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+                    (x1, y1, x2, y2) = box.astype("int")
+                    width_in_pixels = x2 - x1
 
-                        # Calculate the distance to the object
-                        distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, width_in_pixels)
-                        distances.append((distance, x1, y1, x2, y2))
+                    # Calculate the distance to the object
+                    distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, width_in_pixels)
+                    distances.append((distance, x1, y1, x2, y2))
 
-                        # Put bounding box in the image
-                        cv2.rectangle(imgInput, (x1, y1), (x2, y2), (255, 0, 255), 3)
+                    label = "{}: {:.2f}m".format(classNames[idx], distance)
+                    cv2.rectangle(imgInput, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                    cv2.putText(imgInput, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
-                        # Confidence
-                        confidence = math.ceil((box.conf[0] * 100)) / 100
+            # Obstacle avoidance logic
+            if distances:
+                closest_object = min(distances, key=lambda x: x[0])  # Find the closest object
+                distance, x1, y1, x2, y2 = closest_object
 
-                        # Class name
-                        cls = int(box.cls[0])
-                        class_name = classNames[cls]
+                if distance < 0.2:  # Example threshold distance in meters
+                    center_x = (x1 + x2) // 2
 
-                        # Object details
-                        org = (x1, y1 - 10)
-                        font = cv2.FONT_HERSHEY_SIMPLEX
-                        fontScale = 0.5
-                        color = (255, 0, 0)
-                        thickness = 2
-
-                        cv2.putText(imgInput, f"{class_name} {confidence:.2f} {distance:.2f}m", org, font, fontScale, color, thickness)
+                    if center_x < imgInput.shape[1] // 3:
+                        move_right()
+                    elif center_x > 2 * imgInput.shape[1] // 3:
+                        move_left()
+                    else:
+                        move_backward()
+                else:
+                    move_forward()
+            else:
+                move_forward()
 
         return imgInput
 
@@ -253,7 +325,7 @@ class CVThread(threading.Thread):
         self.pause()
            
     def automatic(self, frame):
-        self.results = model(frame, stream=True)
+        pass
 
         
 
