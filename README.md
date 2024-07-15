@@ -7,6 +7,10 @@ This repository contains the code for an autonomous robot vehicle designed to fo
   - [Table of Contents](#table-of-contents)
   - [Introduction](#introduction)
   - [Features](#features)
+  - [Example](#example)
+    - [webApp](#webapp)
+    - [Distance Keeping](#distance-keeping)
+    - [Find color](#find-color)
   - [Hardware Requirements](#hardware-requirements)
   - [Software Requirements](#software-requirements)
   - [Installation](#installation)
@@ -22,6 +26,9 @@ This repository contains the code for an autonomous robot vehicle designed to fo
 ## Introduction
 The autonomous robot vehicle is designed to demonstrate the capabilities of modern robotics in terms of navigation and obstacle avoidance. It utilizes a combination of motor control, servo control, ultrasonic sensors, and LED indicators to move around its environment, detect and avoid obstacles, and follow predefined lines.
 
+
+
+
 ## Features
 - **Line Following**: Uses infrared sensors to detect and follow lines on the ground.
 - **Camera Tracking**: Utilizes a camera to follow visual markers or paths.
@@ -31,6 +38,14 @@ The autonomous robot vehicle is designed to demonstrate the capabilities of mode
 - **LED Indicators**: Uses RGB LEDs to indicate the robot's status and actions.
 - **Automatic Mode**: Combines various sensors and actuators for autonomous navigation.
 - **Distance Keeping**: Maintains a safe distance from obstacles.
+
+## Example
+### webApp
+![Alt text](images\webapp.png)
+### Distance Keeping
+![Alt text](images\kdv2.gif)
+### Find color
+[![Alt text](images\findColor.gif)
 
 ## Hardware Requirements
 - Raspberry Pi (any model with GPIO pins)
