@@ -168,9 +168,9 @@ class Functions(threading.Thread):
 # Filter out occasional incorrect distance data.
 	def distRedress(self): 
 		mark = 0
-		distValue = ultra.checkdist()* 100
+		distValue = ultra.get_distance()* 100
 		while True:
-			distValue = ultra.checkdist()* 100
+			distValue = ultra.get_distance()* 100
 			if distValue > 900:
 				mark +=  1
 			elif mark > 5 or distValue < 900:
