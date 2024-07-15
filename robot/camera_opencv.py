@@ -241,12 +241,12 @@ class CVThread(threading.Thread):
 
             for i in range(detections.shape[2]):
                 confidence = detections[0, 0, i, 2]
-                if confidence > 0.2:  # Confidence threshold
+                if confidence > 0.15:  # Confidence threshold
                     idx = int(detections[0, 0, i, 1])
                     box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                     (x1, y1, x2, y2) = box.astype("int")
                     width_in_pixels = x2 - x1
-                    if classNames[idx] in ["bottle",  "person"]:
+                    if classNames[idx] in ("bottle",  "person"):
                         # Calculate the distance to the object
                         distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, width_in_pixels)
                         distances.append((distance, x1, y1, x2, y2))
@@ -260,7 +260,7 @@ class CVThread(threading.Thread):
                 closest_object = min(distances, key=lambda x: x[0])  # Find the closest object
                 distance, x1, y1, x2, y2 = closest_object
 
-                if distance < 0.2:  # Example threshold distance in meters
+                if distance < 0.4:  # Example threshold distance in meters
                     center_x = (x1 + x2) // 2
 
                     if center_x < imgInput.shape[1] // 3:
