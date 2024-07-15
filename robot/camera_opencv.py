@@ -38,6 +38,7 @@ classNames = ["background", "aeroplane", "bicycle", "bird", "boat",
               "dog", "horse", "motorbike", "person", "pottedplant", "sheep",
               "sofa", "train", "tvmonitor"]
 
+
 robot_move = RobotMove()
 led = RobotLight()
 scGear = ServoCtrl()
@@ -245,14 +246,14 @@ class CVThread(threading.Thread):
                     box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
                     (x1, y1, x2, y2) = box.astype("int")
                     width_in_pixels = x2 - x1
+                    if classNames[idx] in ["bottle",  "person"]:
+                        # Calculate the distance to the object
+                        distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, width_in_pixels)
+                        distances.append((distance, x1, y1, x2, y2))
 
-                    # Calculate the distance to the object
-                    distance = calculate_distance(KNOWN_WIDTH, FOCAL_LENGTH, width_in_pixels)
-                    distances.append((distance, x1, y1, x2, y2))
-
-                    label = "{}: {:.2f}m".format(classNames[idx], distance)
-                    cv2.rectangle(imgInput, (x1, y1), (x2, y2), (255, 0, 0), 2)
-                    cv2.putText(imgInput, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
+                        label = "{}: {:.2f}m".format(classNames[idx], distance)
+                        cv2.rectangle(imgInput, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                        cv2.putText(imgInput, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 2)
 
             # Obstacle avoidance logic
             if distances:
