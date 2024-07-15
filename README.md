@@ -49,7 +49,7 @@ The autonomous robot vehicle is designed to demonstrate the capabilities of mode
 ### Find color
 ![Alt text](images/findColor.gif)
 ### Motion get
-![Alt text](images/det.gif)
+![Alt text](images/detect.gif)
 ### Automatic
 ![Alt text](images/autov2.gif)
 
