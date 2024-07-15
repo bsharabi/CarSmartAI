@@ -238,7 +238,7 @@ class Functions(threading.Thread):
 
 	def keepDisProcessing(self):
 		print('keepDistanceProcessing')
-		distanceGet = ultra.checkdist()
+		distanceGet = ultra.get_distance()
 		if distanceGet > (self.rangeKeep/2+0.1):
 			robot_move.move(80,'forward')
 			
